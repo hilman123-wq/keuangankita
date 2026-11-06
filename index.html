@@ -24,6 +24,25 @@
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
+    <script>
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+</script>
+<style>
+    /* CSS Otomatis untuk Mode Gelap */
+    html.dark body { background-color: #111827; color: #f3f4f6; }
+    html.dark .bg-white, html.dark .bg-gray-50 { background-color: #1f2937 !important; border-color: #374151 !important; }
+    html.dark .text-gray-800, html.dark .text-gray-900 { color: #f9fafb !important; }
+    html.dark .text-gray-600, html.dark .text-gray-500 { color: #9ca3af !important; }
+    html.dark .border-gray-200, html.dark .border-gray-300 { border-color: #374151 !important; }
+    html.dark input, html.dark select { background-color: #374151 !important; color: #fff !important; border-color: #4b5563 !important; }
+    html.dark table thead { background-color: #374151 !important; color: #e5e7eb !important; }
+    html.dark tbody tr { border-color: #374151 !important; }
+    html.dark .shadow-sm, html.dark .shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5); }
+</style>
 </head>
 <body class="text-gray-800 h-screen flex overflow-hidden">
 
@@ -104,6 +123,14 @@
                     <i class="fas fa-hand-holding-usd w-5 text-center text-orange-500"></i> Hutang & Cicilan
                 </button>
             </nav>
+
+            <!-- FITUR BARU: TOMBOL MODE GELAP -->
+            <div class="px-6 mb-2 mt-2">
+                <button onclick="toggleDarkMode()" class="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold transition dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600">
+                    <span id="dark-mode-icon">🌙</span> <span id="dark-mode-text">Mode Gelap</span>
+                </button>
+            </div>
+
             <div class="p-4 border-t">
                 <div class="flex items-center gap-3 mb-4">
                     <div class="w-10 h-10 rounded-full bg-teal-500 text-white flex items-center justify-center font-bold" id="user-avatar">A</div>
@@ -593,11 +620,17 @@
                 currentUser = data;
                 errEl.classList.add('hidden');
                 document.getElementById('view-login').style.opacity = '0';
-                setTimeout(() => {
+                
+                // PERUBAHAN DISINI: Tambahkan async pada setTimeout
+                setTimeout(async () => {
                     document.getElementById('view-login').classList.add('hidden');
                     document.getElementById('app-layout').classList.remove('hidden');
                     document.getElementById('current-user-name').innerText = user.charAt(0).toUpperCase() + user.slice(1);
                     document.getElementById('user-avatar').innerText = user.charAt(0).toUpperCase();
+                    
+                    // JALANKAN ROBOT TRANSAKSI OTOMATIS SEBELUM APLIKASI DIMUAT
+                    await checkAndRunAutoBills();
+                    
                     initApp();
                 }, 500);
                 showToast(`Selamat datang, ${user}!`);
@@ -1524,6 +1557,64 @@
             });
         }
 
+        // --- FITUR BARU: MODE GELAP (DARK MODE) ---
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            document.getElementById('dark-mode-icon').innerText = isDark ? '☀️' : '🌙';
+            document.getElementById('dark-mode-text').innerText = isDark ? 'Mode Terang' : 'Mode Gelap';
+        }
+
+        // Sesuaikan ikon saat halaman pertama kali dimuat
+        document.addEventListener('DOMContentLoaded', () => {
+            const isDark = document.documentElement.classList.contains('dark');
+            const icon = document.getElementById('dark-mode-icon');
+            const text = document.getElementById('dark-mode-text');
+            if(icon && text) {
+                icon.innerText = isDark ? '☀️' : '🌙';
+                text.innerText = isDark ? 'Mode Terang' : 'Mode Gelap';
+            }
+        });
+
+        // --- FITUR BARU: ROBOT TRANSAKSI OTOMATIS ---
+        async function checkAndRunAutoBills() {
+            const today = new Date();
+            const currentDay = today.getDate();
+            const currentMonthYear = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}`; 
+
+            try {
+                // Ambil data jadwal dari Supabase
+                const { data: recurrings, error } = await client.from('recurring_transactions').select('*');
+                if (error || !recurrings) return; // Abaikan jika tabel belum ada atau kosong
+
+                for (const r of recurrings) {
+                    // Cek: Apakah hari ini sudah lewat tanggal rutin? & Apakah bulan ini belum dibayar?
+                    if (currentDay >= r.tanggal_rutin && r.terakhir_diproses !== currentMonthYear) {
+                        
+                        // 1. Catat ke Pengeluaran Otomatis
+                        await client.from('expenses').insert([{
+                            tanggal: today.toISOString().split('T')[0],
+                            kategori: r.kategori,
+                            subkategori: r.subkategori,
+                            item: r.item + ' (Auto)', // Tanda dari sistem
+                            pic: 'bersama',
+                            jumlah: r.jumlah
+                        }]);
+
+                        // 2. Tandai bahwa bulan ini sudah berhasil diproses
+                        await client.from('recurring_transactions')
+                            .update({ terakhir_diproses: currentMonthYear })
+                            .eq('id', r.id);
+                        
+                        showToast(`Tagihan otomatis ${r.item} berhasil diproses!`);
+                    }
+                }
+            } catch (err) {
+                console.error("Gagal memproses tagihan otomatis:", err);
+            }
+        }
+        
     </script>
 </body>
 </html>
