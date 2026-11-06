@@ -1,0 +1,16 @@
+{
+"name": "Keuangan Keluarga",
+"short_name": "Keuangan",
+"start_url": "./index.html",
+"display": "standalone",
+"background_color": "#f3f4f6",
+"theme_color": "#0d9488",
+"description": "Aplikasi Manajemen Keuangan Keluarga",
+"icons": [
+{
+"src": "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
+"sizes": "512x512",
+"type": "image/png"
+}
+]
+}
