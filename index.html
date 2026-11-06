@@ -360,10 +360,11 @@
                                             <th class="p-3 border-b font-medium">Bulan</th>
                                             <th class="p-3 border-b font-medium">Pemasukan</th>
                                             <th class="p-3 border-b font-medium">Total Keluar</th>
-                                            <th class="p-3 border-b font-medium text-red-500 bg-red-50">Tagihan</th>
-                                            <th class="p-3 border-b font-medium text-blue-500 bg-blue-50">Kebutuhan</th>
+                                            <th class="p-3 border-b font-medium text-red-500 bg-red-50">Tagihan Utilitas</th>
+                                            <th class="p-3 border-b font-medium text-blue-500 bg-blue-50">Kebutuhan Pokok</th>
                                             <th class="p-3 border-b font-medium text-yellow-600 bg-yellow-50">Jajan</th>
-                                            <th class="p-3 border-b font-medium text-green-500 bg-green-50">Tabungan</th>
+                                            <th class="p-3 border-b font-medium text-purple-500 bg-purple-50">Sosial</th>
+                                            <th class="p-3 border-b font-medium text-green-500 bg-green-50">Tabungan & Inv</th>
                                             <th class="p-3 border-b font-medium text-right">Saldo Bersih</th>
                                         </tr>
                                     </thead>
@@ -382,10 +383,11 @@
                                             <th class="p-3 border-b font-medium">Tahun</th>
                                             <th class="p-3 border-b font-medium">Pemasukan</th>
                                             <th class="p-3 border-b font-medium">Total Keluar</th>
-                                            <th class="p-3 border-b font-medium text-red-500 bg-red-50">Tagihan</th>
-                                            <th class="p-3 border-b font-medium text-blue-500 bg-blue-50">Kebutuhan</th>
+                                            <th class="p-3 border-b font-medium text-red-500 bg-red-50">Tagihan Utilitas</th>
+                                            <th class="p-3 border-b font-medium text-blue-500 bg-blue-50">Kebutuhan Pokok</th>
                                             <th class="p-3 border-b font-medium text-yellow-600 bg-yellow-50">Jajan</th>
-                                            <th class="p-3 border-b font-medium text-green-500 bg-green-50">Tabungan</th>
+                                            <th class="p-3 border-b font-medium text-purple-500 bg-purple-50">Sosial</th>
+                                            <th class="p-3 border-b font-medium text-green-500 bg-green-50">Tabungan & Inv</th>
                                             <th class="p-3 border-b font-medium text-right">Saldo Bersih</th>
                                         </tr>
                                     </thead>
@@ -432,16 +434,19 @@
             </div>
             
             <form id="budget-form" onsubmit="saveBudgets(event)" class="space-y-4">
-                <div><label class="block text-sm mb-1 text-gray-600">Tagihan (Rp)</label>
+                <div><label class="block text-sm mb-1 text-gray-600">Tagihan utilitas (Rp)</label>
                 <input type="number" id="budget-tagihan" class="w-full border p-2 rounded focus:ring-2 focus:ring-teal-400 outline-none" required></div>
                 
-                <div><label class="block text-sm mb-1 text-gray-600">Kebutuhan (Rp)</label>
+                <div><label class="block text-sm mb-1 text-gray-600">Kebutuhan pokok (Rp)</label>
                 <input type="number" id="budget-kebutuhan" class="w-full border p-2 rounded focus:ring-2 focus:ring-teal-400 outline-none" required></div>
                 
                 <div><label class="block text-sm mb-1 text-gray-600">Jajan (Rp)</label>
                 <input type="number" id="budget-jajan" class="w-full border p-2 rounded focus:ring-2 focus:ring-teal-400 outline-none" required></div>
+
+                <div><label class="block text-sm mb-1 text-gray-600">Sosial (Rp)</label>
+                <input type="number" id="budget-sosial" class="w-full border p-2 rounded focus:ring-2 focus:ring-teal-400 outline-none" required></div>
                 
-                <div><label class="block text-sm mb-1 text-gray-600">Tabungan (Rp)</label>
+                <div><label class="block text-sm mb-1 text-gray-600">Tabungan & investasi (Rp)</label>
                 <input type="number" id="budget-tabungan" class="w-full border p-2 rounded focus:ring-2 focus:ring-teal-400 outline-none" required></div>
 
                 <div class="pt-4 flex justify-end gap-3">
@@ -600,7 +605,13 @@
                 b.data.forEach(item => { db.budgets[item.kategori] = item.limit_amount; });
             } else {
                 // Fallback default jika tabel belum diisi
-                db.budgets = { 'Tagihan': 1800000, 'Kebutuhan': 800000, 'Jajan': 500000, 'Tabungan': 500000 };
+                db.budgets = { 
+                    'Tagihan utilitas': 350000, 
+                    'Kebutuhan pokok': 1900000, 
+                    'Jajan': 600000, 
+                    'Sosial': 400000, 
+                    'Tabungan & investasi': 950000 
+                };
             }
         }
 
@@ -653,7 +664,10 @@
                 <tr class="border-b hover:bg-gray-50">
                     <td class="p-4">${item.tanggal}</td>
                     <td class="p-4 font-medium">${item.item}</td>
-                    <td class="p-4"><span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs">${item.kategori}</span></td>
+                    <td class="p-4">
+                        <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs block w-fit mb-1">${item.kategori}</span>
+                        <span class="text-xs text-teal-600 font-medium">${item.subkategori || '-'}</span>
+                    </td>
                     <td class="p-4 capitalize">${item.pic}</td>
                     <td class="p-4 font-medium text-red-600">${formatRp(item.jumlah)}</td>
                     <td class="p-4 text-center">
@@ -694,8 +708,8 @@
                 const month = inc.tanggal.substring(0, 7); // YYYY-MM
                 const year = inc.tanggal.substring(0, 4);  // YYYY
 
-                if (!monthlyData[month]) monthlyData[month] = { masuk: 0, keluar: 0, Tagihan: 0, Kebutuhan: 0, Jajan: 0, Tabungan: 0 };
-                if (!yearlyData[year]) yearlyData[year] = { masuk: 0, keluar: 0, Tagihan: 0, Kebutuhan: 0, Jajan: 0, Tabungan: 0 };
+                if (!monthlyData[month]) monthlyData[month] = { masuk: 0, keluar: 0, 'Tagihan utilitas': 0, 'Kebutuhan pokok': 0, 'Jajan': 0, 'Sosial': 0, 'Tabungan & investasi': 0 };
+                if (!yearlyData[year]) yearlyData[year] = { masuk: 0, keluar: 0, 'Tagihan utilitas': 0, 'Kebutuhan pokok': 0, 'Jajan': 0, 'Sosial': 0, 'Tabungan & investasi': 0 };
 
                 monthlyData[month].masuk += inc.jumlah;
                 yearlyData[year].masuk += inc.jumlah;
@@ -706,8 +720,8 @@
                 const month = exp.tanggal.substring(0, 7);
                 const year = exp.tanggal.substring(0, 4);
 
-                if (!monthlyData[month]) monthlyData[month] = { masuk: 0, keluar: 0, Tagihan: 0, Kebutuhan: 0, Jajan: 0, Tabungan: 0 };
-                if (!yearlyData[year]) yearlyData[year] = { masuk: 0, keluar: 0, Tagihan: 0, Kebutuhan: 0, Jajan: 0, Tabungan: 0 };
+                if (!monthlyData[month]) monthlyData[month] = { masuk: 0, keluar: 0, 'Tagihan utilitas': 0, 'Kebutuhan pokok': 0, 'Jajan': 0, 'Sosial': 0, 'Tabungan & investasi': 0 };
+                if (!yearlyData[year]) yearlyData[year] = { masuk: 0, keluar: 0, 'Tagihan utilitas': 0, 'Kebutuhan pokok': 0, 'Jajan': 0, 'Sosial': 0, 'Tabungan & investasi': 0 };
 
                 monthlyData[month].keluar += exp.jumlah;
                 yearlyData[year].keluar += exp.jumlah;
@@ -728,10 +742,11 @@
                     <td class="p-3 font-bold">${m}</td>
                     <td class="p-3 text-green-600 font-medium">${formatRp(d.masuk)}</td>
                     <td class="p-3 text-gray-800 font-medium">${formatRp(d.keluar)}</td>
-                    <td class="p-3 text-red-500 bg-red-50 bg-opacity-50">${formatRp(d.Tagihan)}</td>
-                    <td class="p-3 text-blue-500 bg-blue-50 bg-opacity-50">${formatRp(d.Kebutuhan)}</td>
-                    <td class="p-3 text-yellow-600 bg-yellow-50 bg-opacity-50">${formatRp(d.Jajan)}</td>
-                    <td class="p-3 text-green-600 bg-green-50 bg-opacity-50">${formatRp(d.Tabungan)}</td>
+                    <td class="p-3 text-red-500 bg-red-50 bg-opacity-50">${formatRp(d['Tagihan utilitas'] || 0)}</td>
+                    <td class="p-3 text-blue-500 bg-blue-50 bg-opacity-50">${formatRp(d['Kebutuhan pokok'] || 0)}</td>
+                    <td class="p-3 text-yellow-600 bg-yellow-50 bg-opacity-50">${formatRp(d['Jajan'] || 0)}</td>
+                    <td class="p-3 text-purple-500 bg-purple-50 bg-opacity-50">${formatRp(d['Sosial'] || 0)}</td>
+                    <td class="p-3 text-green-600 bg-green-50 bg-opacity-50">${formatRp(d['Tabungan & investasi'] || 0)}</td>
                     <td class="p-3 font-bold text-right ${saldo >= 0 ? 'text-green-600' : 'text-red-600'}">${formatRp(saldo)}</td>
                 </tr>`;
             }).join('');
@@ -744,14 +759,31 @@
                     <td class="p-3 font-bold">${y}</td>
                     <td class="p-3 text-green-600 font-medium">${formatRp(d.masuk)}</td>
                     <td class="p-3 text-gray-800 font-medium">${formatRp(d.keluar)}</td>
-                    <td class="p-3 text-red-500 bg-red-50 bg-opacity-50">${formatRp(d.Tagihan)}</td>
-                    <td class="p-3 text-blue-500 bg-blue-50 bg-opacity-50">${formatRp(d.Kebutuhan)}</td>
-                    <td class="p-3 text-yellow-600 bg-yellow-50 bg-opacity-50">${formatRp(d.Jajan)}</td>
-                    <td class="p-3 text-green-600 bg-green-50 bg-opacity-50">${formatRp(d.Tabungan)}</td>
+                    <td class="p-3 text-red-500 bg-red-50 bg-opacity-50">${formatRp(d['Tagihan utilitas'] || 0)}</td>
+                    <td class="p-3 text-blue-500 bg-blue-50 bg-opacity-50">${formatRp(d['Kebutuhan pokok'] || 0)}</td>
+                    <td class="p-3 text-yellow-600 bg-yellow-50 bg-opacity-50">${formatRp(d['Jajan'] || 0)}</td>
+                    <td class="p-3 text-purple-500 bg-purple-50 bg-opacity-50">${formatRp(d['Sosial'] || 0)}</td>
+                    <td class="p-3 text-green-600 bg-green-50 bg-opacity-50">${formatRp(d['Tabungan & investasi'] || 0)}</td>
                     <td class="p-3 font-bold text-right ${saldo >= 0 ? 'text-green-600' : 'text-red-600'}">${formatRp(saldo)}</td>
                 </tr>`;
             }).join('');
         }
+
+        // Object untuk menyimpan daftar subkategori
+        const subkatMap = {
+            'Tagihan utilitas': ['Tidak ada'],
+            'Kebutuhan pokok': ['KPR', 'Keperluan Rumah', 'Groceries', 'Personal care', 'Pulsa', 'Transportasi', 'Keperluan Anak'],
+            'Jajan': ['Ayah', 'Ibun', 'Anak', 'Makan di luar'],
+            'Sosial': ['IF', 'Keluarga'],
+            'Tabungan & investasi': ['Tabungan target', 'Dana darurat', 'Investasi pendidikan']
+        };
+
+        // Fungsi untuk mengupdate dropdown subkategori saat kategori berubah
+        window.updateSubkat = function() {
+            const kat = document.getElementById('input-kategori').value;
+            const subOpts = subkatMap[kat].map(s => `<option value="${s}">${s}</option>`).join('');
+            document.getElementById('input-subkategori').innerHTML = subOpts;
+        };
 
         // --- FORM MODAL LOGIC ---
         function openForm(type, data = null) {
@@ -776,7 +808,7 @@
                 `;
             } else if (type === 'expense') {
                 title.innerText = data ? 'Edit Pengeluaran' : 'Tambah Pengeluaran';
-                const katArr = ['Tagihan', 'Kebutuhan', 'Jajan', 'Tabungan'];
+                const katArr = ['Tagihan utilitas', 'Kebutuhan pokok', 'Jajan', 'Sosial', 'Tabungan & investasi'];
                 const picArr = ['ayah', 'ibun', 'bersama'];
                 
                 let katOpts = katArr.map(k => `<option value="${k}" ${data && data.kategori === k ? 'selected' : ''}>${k}</option>`).join('');
@@ -787,10 +819,14 @@
                         <div><label class="block text-sm mb-1 text-gray-600">Tanggal</label>
                         <input type="date" id="input-tanggal" class="w-full border p-2 rounded focus:ring-2 focus:ring-teal-400 outline-none" required value="${data ? data.tanggal : new Date().toISOString().split('T')[0]}"></div>
                         <div><label class="block text-sm mb-1 text-gray-600">Kategori</label>
-                        <select id="input-kategori" class="w-full border p-2 rounded focus:ring-2 focus:ring-teal-400 outline-none">${katOpts}</select></div>
+                        <select id="input-kategori" onchange="updateSubkat()" class="w-full border p-2 rounded focus:ring-2 focus:ring-teal-400 outline-none">${katOpts}</select></div>
                     </div>
-                    <div><label class="block text-sm mb-1 text-gray-600">Nama Item</label>
-                    <input type="text" id="input-item" class="w-full border p-2 rounded focus:ring-2 focus:ring-teal-400 outline-none" required value="${data ? data.item : ''}" placeholder="Cth: Popok Anak, KPR"></div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="block text-sm mb-1 text-gray-600">Subkategori</label>
+                        <select id="input-subkategori" class="w-full border p-2 rounded focus:ring-2 focus:ring-teal-400 outline-none"></select></div>
+                        <div><label class="block text-sm mb-1 text-gray-600">Nama Item (Catatan)</label>
+                        <input type="text" id="input-item" class="w-full border p-2 rounded focus:ring-2 focus:ring-teal-400 outline-none" required value="${data ? data.item : ''}" placeholder="Cth: Bayar cicilan"></div>
+                    </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div><label class="block text-sm mb-1 text-gray-600">PIC</label>
                         <select id="input-pic" class="w-full border p-2 rounded focus:ring-2 focus:ring-teal-400 outline-none">${picOpts}</select></div>
@@ -810,7 +846,15 @@
 
             fields.innerHTML = html;
             modal.classList.remove('hidden');
-            setTimeout(() => content.classList.replace('scale-95', 'scale-100'), 10);
+            setTimeout(() => {
+                content.classList.replace('scale-95', 'scale-100');
+                if (type === 'expense') {
+                    updateSubkat(); // Inisialisasi subkategori
+                    if (data && data.subkategori) {
+                        document.getElementById('input-subkategori').value = data.subkategori;
+                    }
+                }
+            }, 10);
         }
 
         function closeModal() {
@@ -843,6 +887,7 @@
                 const newData = {
                     tanggal: document.getElementById('input-tanggal').value,
                     kategori: document.getElementById('input-kategori').value,
+                    subkategori: document.getElementById('input-subkategori').value,
                     item: document.getElementById('input-item').value,
                     pic: document.getElementById('input-pic').value,
                     jumlah: parseInt(document.getElementById('input-jumlah').value)
@@ -987,10 +1032,11 @@
             const content = document.getElementById('budget-modal-content');
             
             // Isi form dengan data budget saat ini
-            document.getElementById('budget-tagihan').value = db.budgets['Tagihan'] || 0;
-            document.getElementById('budget-kebutuhan').value = db.budgets['Kebutuhan'] || 0;
-            document.getElementById('budget-jajan').value = db.budgets['Jajan'] || 0;
-            document.getElementById('budget-tabungan').value = db.budgets['Tabungan'] || 0;
+            document.getElementById('budget-tagihan').value = db.budgets['Tagihan utilitas'] || 350000;
+            document.getElementById('budget-kebutuhan').value = db.budgets['Kebutuhan pokok'] || 1900000;
+            document.getElementById('budget-jajan').value = db.budgets['Jajan'] || 600000;
+            document.getElementById('budget-sosial').value = db.budgets['Sosial'] || 400000;
+            document.getElementById('budget-tabungan').value = db.budgets['Tabungan & investasi'] || 950000;
 
             modal.classList.remove('hidden');
             setTimeout(() => content.classList.replace('scale-95', 'scale-100'), 10);
@@ -1010,10 +1056,11 @@
             submitBtn.disabled = true;
 
             const newBudgets = [
-                { kategori: 'Tagihan', limit_amount: parseInt(document.getElementById('budget-tagihan').value) },
-                { kategori: 'Kebutuhan', limit_amount: parseInt(document.getElementById('budget-kebutuhan').value) },
+                { kategori: 'Tagihan utilitas', limit_amount: parseInt(document.getElementById('budget-tagihan').value) },
+                { kategori: 'Kebutuhan pokok', limit_amount: parseInt(document.getElementById('budget-kebutuhan').value) },
                 { kategori: 'Jajan', limit_amount: parseInt(document.getElementById('budget-jajan').value) },
-                { kategori: 'Tabungan', limit_amount: parseInt(document.getElementById('budget-tabungan').value) }
+                { kategori: 'Sosial', limit_amount: parseInt(document.getElementById('budget-sosial').value) },
+                { kategori: 'Tabungan & investasi', limit_amount: parseInt(document.getElementById('budget-tabungan').value) }
             ];
 
             // Upsert (Update jika ada, Insert jika tidak ada) berdasarkan kolom 'kategori'
@@ -1078,7 +1125,7 @@
             document.getElementById('budget-container').innerHTML = budgetHtml;
 
             // Group Expenses by Category
-            const cats = ['Tagihan', 'Kebutuhan', 'Jajan', 'Tabungan'];
+            const cats = ['Tagihan utilitas', 'Kebutuhan pokok', 'Jajan', 'Sosial', 'Tabungan & investasi'];
             const catData = cats.map(cat => {
                 return db.expenses.filter(x => x.kategori === cat).reduce((acc, curr) => acc + curr.jumlah, 0);
             });
@@ -1125,6 +1172,7 @@
                             '#ef4444', // Tagihan (Red)
                             '#3b82f6', // Kebutuhan (Blue)
                             '#f59e0b', // Jajan (Yellow)
+                            '#8b5cf6', // Sosial (Purple)
                             '#10b981'  // Tabungan (Green)
                         ],
                         borderWidth: 0,
