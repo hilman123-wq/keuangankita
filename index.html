@@ -180,7 +180,10 @@
 
                     <!-- FITUR BARU 1: SISTEM BUDGETING -->
                     <div class="bg-white p-6 rounded-xl shadow-sm border-t-4 border-teal-500">
-                        <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fas fa-chart-pie text-teal-500 mr-2"></i>Batas Anggaran (Budgeting) Bulan Ini</h3>
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-bold text-gray-800"><i class="fas fa-chart-pie text-teal-500 mr-2"></i>Batas Anggaran (Budgeting) Bulan Ini</h3>
+                            <button onclick="openBudgetModal()" class="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-lg transition font-medium"><i class="fas fa-cog"></i> Atur</button>
+                        </div>
                         <div id="budget-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <!-- Di-render oleh Javascript (JS) -->
                         </div>
@@ -412,6 +415,35 @@
         </div>
     </div>
 
+    <!-- BUDGET MODAL -->
+    <div id="budget-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex justify-center items-center backdrop-blur-sm p-4 overflow-y-auto">
+        <div class="bg-white p-6 md:p-8 rounded-xl shadow-xl w-full max-w-md transform scale-95 transition-transform duration-200" id="budget-modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-gray-800">Atur Batas Anggaran</h3>
+                <button onclick="closeBudgetModal()" class="text-gray-400 hover:text-red-500 transition text-2xl">&times;</button>
+            </div>
+            
+            <form id="budget-form" onsubmit="saveBudgets(event)" class="space-y-4">
+                <div><label class="block text-sm mb-1 text-gray-600">Tagihan (Rp)</label>
+                <input type="number" id="budget-tagihan" class="w-full border p-2 rounded focus:ring-2 focus:ring-teal-400 outline-none" required></div>
+                
+                <div><label class="block text-sm mb-1 text-gray-600">Kebutuhan (Rp)</label>
+                <input type="number" id="budget-kebutuhan" class="w-full border p-2 rounded focus:ring-2 focus:ring-teal-400 outline-none" required></div>
+                
+                <div><label class="block text-sm mb-1 text-gray-600">Jajan (Rp)</label>
+                <input type="number" id="budget-jajan" class="w-full border p-2 rounded focus:ring-2 focus:ring-teal-400 outline-none" required></div>
+                
+                <div><label class="block text-sm mb-1 text-gray-600">Tabungan (Rp)</label>
+                <input type="number" id="budget-tabungan" class="w-full border p-2 rounded focus:ring-2 focus:ring-teal-400 outline-none" required></div>
+
+                <div class="pt-4 flex justify-end gap-3">
+                    <button type="button" onclick="closeBudgetModal()" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition shadow">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         // --- SUPABASE CONFIG ---
         const supabaseUrl = 'https://gfllzeyidakcmogaizbx.supabase.co';
@@ -423,7 +455,8 @@
             users: [],
             incomes: [],
             expenses: [],
-            targets: []
+            targets: [],
+            budgets: {}
         };
 
         let currentUser = null;
@@ -435,13 +468,7 @@
         let filterIncome = { month: '', search: '' };
         let filterExpense = { month: '', search: '' };
         
-        // Konfigurasi budget batas maksimal bulanan (sesuai foto kebutuhan)
-        const budgetLimits = {
-            'Tagihan': 1800000,
-            'Kebutuhan': 800000,
-            'Jajan': 500000,
-            'Tabungan': 500000
-        };
+        // Konfigurasi budget dihapus dari hardcode, sekarang mengambil dari db.budgets
 
         // --- DAFTARKAN SERVICE WORKER PWA ---
         if ('serviceWorker' in navigator) {
@@ -546,17 +573,27 @@
 
         async function fetchAllData() {
             // Mengambil semua data dari Supabase secara paralel agar cepat
-            const [u, i, e, t] = await Promise.all([
+            const [u, i, e, t, b] = await Promise.all([
                 client.from('users').select('*').order('id', { ascending: true }),
                 client.from('incomes').select('*').order('tanggal', { ascending: false }),
                 client.from('expenses').select('*').order('tanggal', { ascending: false }),
-                client.from('financial_targets').select('*')
+                client.from('financial_targets').select('*'),
+                client.from('budgets').select('*')
             ]);
             
             db.users = u.data || [];
             db.incomes = i.data || [];
             db.expenses = e.data || [];
             db.targets = t.data || [];
+            
+            // Format data budget agar mudah dibaca oleh Javascript
+            db.budgets = {};
+            if (b.data && b.data.length > 0) {
+                b.data.forEach(item => { db.budgets[item.kategori] = item.limit_amount; });
+            } else {
+                // Fallback default jika tabel belum diisi
+                db.budgets = { 'Tagihan': 1800000, 'Kebutuhan': 800000, 'Jajan': 500000, 'Tabungan': 500000 };
+            }
         }
 
         async function initApp() {
@@ -892,6 +929,53 @@
             showToast(`Berhasil menduplikat ${newData.length} data tagihan!`);
         }
 
+        // --- BUDGET MODAL LOGIC ---
+        function openBudgetModal() {
+            const modal = document.getElementById('budget-modal');
+            const content = document.getElementById('budget-modal-content');
+            
+            // Isi form dengan data budget saat ini
+            document.getElementById('budget-tagihan').value = db.budgets['Tagihan'] || 0;
+            document.getElementById('budget-kebutuhan').value = db.budgets['Kebutuhan'] || 0;
+            document.getElementById('budget-jajan').value = db.budgets['Jajan'] || 0;
+            document.getElementById('budget-tabungan').value = db.budgets['Tabungan'] || 0;
+
+            modal.classList.remove('hidden');
+            setTimeout(() => content.classList.replace('scale-95', 'scale-100'), 10);
+        }
+
+        function closeBudgetModal() {
+            const modal = document.getElementById('budget-modal');
+            const content = document.getElementById('budget-modal-content');
+            content.classList.replace('scale-100', 'scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 200);
+        }
+
+        async function saveBudgets(e) {
+            e.preventDefault();
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.innerText = "Menyimpan...";
+            submitBtn.disabled = true;
+
+            const newBudgets = [
+                { kategori: 'Tagihan', limit_amount: parseInt(document.getElementById('budget-tagihan').value) },
+                { kategori: 'Kebutuhan', limit_amount: parseInt(document.getElementById('budget-kebutuhan').value) },
+                { kategori: 'Jajan', limit_amount: parseInt(document.getElementById('budget-jajan').value) },
+                { kategori: 'Tabungan', limit_amount: parseInt(document.getElementById('budget-tabungan').value) }
+            ];
+
+            // Upsert (Update jika ada, Insert jika tidak ada) berdasarkan kolom 'kategori'
+            await client.from('budgets').upsert(newBudgets, { onConflict: 'kategori' });
+            
+            await fetchAllData();
+            submitBtn.innerText = "Simpan";
+            submitBtn.disabled = false;
+            
+            closeBudgetModal();
+            updateDashboard();
+            showToast('Batas anggaran berhasil diperbarui!');
+        }
+
         // --- DASHBOARD & CHARTS ---
         function updateDashboard() {
             const totalIn = db.incomes.reduce((acc, curr) => acc + curr.jumlah, 0);
@@ -916,9 +1000,9 @@
             const thisMonthExpenses = db.expenses.filter(e => e.tanggal.startsWith(currentMonth));
             
             let budgetHtml = '';
-            for (const [kat, limit] of Object.entries(budgetLimits)) {
+            for (const [kat, limit] of Object.entries(db.budgets)) {
                 const spent = thisMonthExpenses.filter(e => e.kategori === kat).reduce((acc, curr) => acc + curr.jumlah, 0);
-                const pct = Math.min((spent / limit) * 100, 100); // Batas bar tidak lewat dari 100%
+                const pct = limit > 0 ? Math.min((spent / limit) * 100, 100) : 0; // Batas bar tidak lewat dari 100%
                 
                 const isDanger = pct >= 90; // Merah jika pemakaian > 90%
                 const isWarning = pct >= 75 && !isDanger; // Kuning jika > 75%
