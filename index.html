@@ -346,21 +346,25 @@
                 <div id="view-laporan" class="page-view hidden space-y-6">
                     <div>
                         <h1 class="text-2xl font-bold text-gray-800">Laporan Keuangan</h1>
-                        <p class="text-gray-500 text-sm">Rekapitulasi otomatis bulanan dan tahunan.</p>
+                        <p class="text-gray-500 text-sm">Rekapitulasi otomatis bulanan dan tahunan beserta rincian pengeluaran.</p>
                     </div>
                     
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 gap-6">
                         <!-- Laporan Bulanan -->
                         <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-                            <div class="p-4 border-b bg-gray-50"><h3 class="font-bold text-gray-800">Laporan Bulanan</h3></div>
+                            <div class="p-4 border-b bg-gray-50"><h3 class="font-bold text-gray-800">Laporan Bulanan Terperinci</h3></div>
                             <div class="overflow-x-auto">
                                 <table class="w-full text-left border-collapse text-sm">
                                     <thead>
                                         <tr class="bg-gray-100 text-gray-500 uppercase tracking-wider">
                                             <th class="p-3 border-b font-medium">Bulan</th>
-                                            <th class="p-3 border-b font-medium">Masuk</th>
-                                            <th class="p-3 border-b font-medium">Keluar</th>
-                                            <th class="p-3 border-b font-medium">Saldo</th>
+                                            <th class="p-3 border-b font-medium">Pemasukan</th>
+                                            <th class="p-3 border-b font-medium">Total Keluar</th>
+                                            <th class="p-3 border-b font-medium text-red-500 bg-red-50">Tagihan</th>
+                                            <th class="p-3 border-b font-medium text-blue-500 bg-blue-50">Kebutuhan</th>
+                                            <th class="p-3 border-b font-medium text-yellow-600 bg-yellow-50">Jajan</th>
+                                            <th class="p-3 border-b font-medium text-green-500 bg-green-50">Tabungan</th>
+                                            <th class="p-3 border-b font-medium text-right">Saldo Bersih</th>
                                         </tr>
                                     </thead>
                                     <tbody id="report-monthly-tbody" class="text-gray-700"></tbody>
@@ -370,15 +374,19 @@
 
                         <!-- Laporan Tahunan -->
                         <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-                            <div class="p-4 border-b bg-gray-50"><h3 class="font-bold text-gray-800">Laporan Tahunan</h3></div>
+                            <div class="p-4 border-b bg-gray-50"><h3 class="font-bold text-gray-800">Laporan Tahunan Terperinci</h3></div>
                             <div class="overflow-x-auto">
                                 <table class="w-full text-left border-collapse text-sm">
                                     <thead>
                                         <tr class="bg-gray-100 text-gray-500 uppercase tracking-wider">
                                             <th class="p-3 border-b font-medium">Tahun</th>
-                                            <th class="p-3 border-b font-medium">Masuk</th>
-                                            <th class="p-3 border-b font-medium">Keluar</th>
-                                            <th class="p-3 border-b font-medium">Saldo</th>
+                                            <th class="p-3 border-b font-medium">Pemasukan</th>
+                                            <th class="p-3 border-b font-medium">Total Keluar</th>
+                                            <th class="p-3 border-b font-medium text-red-500 bg-red-50">Tagihan</th>
+                                            <th class="p-3 border-b font-medium text-blue-500 bg-blue-50">Kebutuhan</th>
+                                            <th class="p-3 border-b font-medium text-yellow-600 bg-yellow-50">Jajan</th>
+                                            <th class="p-3 border-b font-medium text-green-500 bg-green-50">Tabungan</th>
+                                            <th class="p-3 border-b font-medium text-right">Saldo Bersih</th>
                                         </tr>
                                     </thead>
                                     <tbody id="report-yearly-tbody" class="text-gray-700"></tbody>
@@ -675,28 +683,72 @@
             }
         }
 
-        // Tarik rekap langsung dari SQL VIEW di Supabase
+        // Kalkulasi rekap laporan langsung menggunakan JavaScript
         async function generateReports() {
-            const { data: monthly } = await client.from('monthly_reports').select('*').order('bulan', { ascending: false });
-            const { data: yearly } = await client.from('yearly_reports').select('*').order('tahun', { ascending: false });
+            // 1. Siapkan wadah untuk data Bulanan dan Tahunan
+            const monthlyData = {};
+            const yearlyData = {};
 
-            // 3. Render ke Tabel HTML (Bulanan)
-            document.getElementById('report-monthly-tbody').innerHTML = (monthly || []).map(m => {
+            // 2. Olah Pemasukan
+            db.incomes.forEach(inc => {
+                const month = inc.tanggal.substring(0, 7); // YYYY-MM
+                const year = inc.tanggal.substring(0, 4);  // YYYY
+
+                if (!monthlyData[month]) monthlyData[month] = { masuk: 0, keluar: 0, Tagihan: 0, Kebutuhan: 0, Jajan: 0, Tabungan: 0 };
+                if (!yearlyData[year]) yearlyData[year] = { masuk: 0, keluar: 0, Tagihan: 0, Kebutuhan: 0, Jajan: 0, Tabungan: 0 };
+
+                monthlyData[month].masuk += inc.jumlah;
+                yearlyData[year].masuk += inc.jumlah;
+            });
+
+            // 3. Olah Pengeluaran & Kategorinya
+            db.expenses.forEach(exp => {
+                const month = exp.tanggal.substring(0, 7);
+                const year = exp.tanggal.substring(0, 4);
+
+                if (!monthlyData[month]) monthlyData[month] = { masuk: 0, keluar: 0, Tagihan: 0, Kebutuhan: 0, Jajan: 0, Tabungan: 0 };
+                if (!yearlyData[year]) yearlyData[year] = { masuk: 0, keluar: 0, Tagihan: 0, Kebutuhan: 0, Jajan: 0, Tabungan: 0 };
+
+                monthlyData[month].keluar += exp.jumlah;
+                yearlyData[year].keluar += exp.jumlah;
+
+                if (monthlyData[month][exp.kategori] !== undefined) monthlyData[month][exp.kategori] += exp.jumlah;
+                if (yearlyData[year][exp.kategori] !== undefined) yearlyData[year][exp.kategori] += exp.jumlah;
+            });
+
+            // 4. Urutkan dari yang terbaru
+            const sortedMonths = Object.keys(monthlyData).sort((a, b) => b.localeCompare(a));
+            const sortedYears = Object.keys(yearlyData).sort((a, b) => b.localeCompare(a));
+
+            // 5. Render ke Tabel HTML (Bulanan)
+            document.getElementById('report-monthly-tbody').innerHTML = sortedMonths.map(m => {
+                const d = monthlyData[m];
+                const saldo = d.masuk - d.keluar;
                 return `<tr class="border-b hover:bg-gray-50">
-                    <td class="p-3 font-medium">${m.bulan}</td>
-                    <td class="p-3 text-green-600">${formatRp(m.total_pemasukan)}</td>
-                    <td class="p-3 text-red-600">${formatRp(m.total_pengeluaran)}</td>
-                    <td class="p-3 font-bold ${m.saldo_bersih >= 0 ? 'text-green-600' : 'text-red-600'}">${formatRp(m.saldo_bersih)}</td>
+                    <td class="p-3 font-bold">${m}</td>
+                    <td class="p-3 text-green-600 font-medium">${formatRp(d.masuk)}</td>
+                    <td class="p-3 text-gray-800 font-medium">${formatRp(d.keluar)}</td>
+                    <td class="p-3 text-red-500 bg-red-50 bg-opacity-50">${formatRp(d.Tagihan)}</td>
+                    <td class="p-3 text-blue-500 bg-blue-50 bg-opacity-50">${formatRp(d.Kebutuhan)}</td>
+                    <td class="p-3 text-yellow-600 bg-yellow-50 bg-opacity-50">${formatRp(d.Jajan)}</td>
+                    <td class="p-3 text-green-600 bg-green-50 bg-opacity-50">${formatRp(d.Tabungan)}</td>
+                    <td class="p-3 font-bold text-right ${saldo >= 0 ? 'text-green-600' : 'text-red-600'}">${formatRp(saldo)}</td>
                 </tr>`;
             }).join('');
 
-            // 4. Render ke Tabel HTML (Tahunan)
-            document.getElementById('report-yearly-tbody').innerHTML = (yearly || []).map(y => {
+            // 6. Render ke Tabel HTML (Tahunan)
+            document.getElementById('report-yearly-tbody').innerHTML = sortedYears.map(y => {
+                const d = yearlyData[y];
+                const saldo = d.masuk - d.keluar;
                 return `<tr class="border-b hover:bg-gray-50">
-                    <td class="p-3 font-medium">${y.tahun}</td>
-                    <td class="p-3 text-green-600">${formatRp(y.total_pemasukan)}</td>
-                    <td class="p-3 text-red-600">${formatRp(y.total_pengeluaran)}</td>
-                    <td class="p-3 font-bold ${y.saldo_bersih >= 0 ? 'text-green-600' : 'text-red-600'}">${formatRp(y.saldo_bersih)}</td>
+                    <td class="p-3 font-bold">${y}</td>
+                    <td class="p-3 text-green-600 font-medium">${formatRp(d.masuk)}</td>
+                    <td class="p-3 text-gray-800 font-medium">${formatRp(d.keluar)}</td>
+                    <td class="p-3 text-red-500 bg-red-50 bg-opacity-50">${formatRp(d.Tagihan)}</td>
+                    <td class="p-3 text-blue-500 bg-blue-50 bg-opacity-50">${formatRp(d.Kebutuhan)}</td>
+                    <td class="p-3 text-yellow-600 bg-yellow-50 bg-opacity-50">${formatRp(d.Jajan)}</td>
+                    <td class="p-3 text-green-600 bg-green-50 bg-opacity-50">${formatRp(d.Tabungan)}</td>
+                    <td class="p-3 font-bold text-right ${saldo >= 0 ? 'text-green-600' : 'text-red-600'}">${formatRp(saldo)}</td>
                 </tr>`;
             }).join('');
         }
