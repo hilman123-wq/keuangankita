@@ -144,7 +144,7 @@
                         <div class="w-full bg-white bg-opacity-30 rounded-full h-4 mb-2 overflow-hidden shadow-inner">
                             <div class="bg-yellow-400 h-4 rounded-full transition-all duration-1000 ease-out" id="target-progress" style="width: 0%"></div>
                         </div>
-                        <p class="text-sm font-medium" id="target-text">Terkumpul: Rp 0 dari Rp 1.000.000.000</p>
+                        <p class="text-sm font-medium" id="target-text">Terkumpul: Rp 0 dari Rp 1.050.000.000</p>
                     </div>
 
                     <!-- Cards -->
@@ -903,7 +903,7 @@
             document.getElementById('dash-saldo').innerText = formatRp(saldo);
 
             // Update Target Progress (fallback jika data target belum ditarik)
-            const targetData = db.targets[0] || { target_dana: 1000000000, nama_target: 'Financial Freedom' };
+            const targetData = db.targets[0] || { target_dana: 1050000000, nama_target: 'Financial Freedom' };
             const maxPersen = (saldo > 0) ? (saldo / targetData.target_dana) * 100 : 0;
             const persentase = Math.min(maxPersen, 100).toFixed(4); // Maksimal bar 100%
             
