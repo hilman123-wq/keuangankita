@@ -139,16 +139,15 @@
                         </div>
                     </div>
 
-                    <!-- Target Financial Freedom -->
-                    <div class="bg-gradient-to-r from-teal-500 to-blue-600 p-6 rounded-xl shadow-md text-white">
-                        <div class="flex justify-between items-center mb-2">
-                            <h3 class="text-lg font-bold"><i class="fas fa-bullseye mr-2"></i>Target Financial Freedom (2040)</h3>
-                            <span class="text-sm bg-white bg-opacity-20 px-3 py-1 rounded-full font-bold" id="target-percentage">0%</span>
+                    <!-- FITUR BARU: Target Tabungan & Impian (Sinking Funds) -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border-t-4 border-blue-500">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-bold text-gray-800"><i class="fas fa-bullseye text-blue-500 mr-2"></i>Target Tabungan & Impian</h3>
+                            <button onclick="openForm('target')" class="text-sm bg-blue-50 hover:bg-blue-100 text-blue-600 px-3 py-1 rounded-lg transition font-medium"><i class="fas fa-plus"></i> Tambah Impian</button>
                         </div>
-                        <div class="w-full bg-white bg-opacity-30 rounded-full h-4 mb-2 overflow-hidden shadow-inner">
-                            <div class="bg-yellow-400 h-4 rounded-full transition-all duration-1000 ease-out" id="target-progress" style="width: 0%"></div>
+                        <div id="target-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- Di-render oleh Javascript (JS) -->
                         </div>
-                        <p class="text-sm font-medium" id="target-text">Terkumpul: Rp 0 dari Rp 1.050.000.000</p>
                     </div>
 
                     <!-- Cards -->
@@ -474,6 +473,42 @@
                 <div class="pt-4 flex justify-end gap-3">
                     <button type="button" onclick="closeBudgetModal()" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">Batal</button>
                     <button type="submit" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition shadow">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TARGET TRANSAKSI MODAL (NABUNG & PAKAI DANA) -->
+    <div id="target-trans-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex justify-center items-center backdrop-blur-sm p-4 overflow-y-auto">
+        <div class="bg-white p-6 md:p-8 rounded-xl shadow-xl w-full max-w-md transform scale-95 transition-transform duration-200" id="target-trans-modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-gray-800" id="tt-modal-title">Kelola Tabungan</h3>
+                <button onclick="closeTargetTransModal()" class="text-gray-400 hover:text-red-500 transition text-2xl">&times;</button>
+            </div>
+            <form id="target-trans-form" onsubmit="processTargetTrans(event)" class="space-y-4">
+                <input type="hidden" id="tt-id">
+                <input type="hidden" id="tt-action">
+                
+                <div><label class="block text-sm mb-1 text-gray-600">Nominal (Rp)</label>
+                <input type="number" id="tt-nominal" class="w-full border p-2 rounded focus:ring-2 focus:ring-teal-400 outline-none" required></div>
+                
+                <!-- Fields Khusus Pakai/Cairkan Dana -->
+                <div id="tt-pakai-fields" class="hidden space-y-4 border-t pt-4 mt-4">
+                    <p class="text-xs text-orange-600 font-bold mb-2"><i class="fas fa-info-circle"></i> Dana yang dicairkan akan otomatis dicatat sebagai Pengeluaran bulan ini agar laporan Anda tetap akurat.</p>
+                    <div><label class="block text-sm mb-1 text-gray-600">Digunakan Untuk (Nama Item)</label>
+                    <input type="text" id="tt-item" class="w-full border p-2 rounded focus:ring-2 focus:ring-teal-400 outline-none" placeholder="Cth: Beli Kulkas Polytron"></div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="block text-sm mb-1 text-gray-600">Kategori</label>
+                        <select id="tt-kategori" onchange="updateTargetTransSubkat()" class="w-full border p-2 rounded focus:ring-2 focus:ring-teal-400 outline-none"></select></div>
+                        <div><label class="block text-sm mb-1 text-gray-600">Subkategori</label>
+                        <select id="tt-subkategori" class="w-full border p-2 rounded focus:ring-2 focus:ring-teal-400 outline-none"></select></div>
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-end gap-3">
+                    <button type="button" onclick="closeTargetTransModal()" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">Batal</button>
+                    <button type="submit" id="tt-submit-btn" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition shadow">Simpan</button>
                 </div>
             </form>
         </div>
@@ -945,6 +980,15 @@
                         <input type="number" id="input-debt-paid-tenor" class="w-full border p-2 rounded focus:ring-2 focus:ring-teal-400 outline-none" value="${data ? data.tenor_terbayar : 0}" placeholder="Cth: 75"></div>
                     </div>
                 `;
+            } else if (type === 'target') {
+                title.innerText = data ? 'Edit Target Tabungan' : 'Tambah Target Tabungan Baru';
+                html = `
+                    <div><label class="block text-sm mb-1 text-gray-600">Nama Target / Impian</label>
+                    <input type="text" id="input-target-nama" class="w-full border p-2 rounded focus:ring-2 focus:ring-teal-400 outline-none" required value="${data ? data.nama_target : ''}" placeholder="Cth: Renovasi Rumah, Beli Kulkas, SPP Anak"></div>
+                    
+                    <div><label class="block text-sm mb-1 text-gray-600">Target Dana yang Dibutuhkan (Rp)</label>
+                    <input type="number" id="input-target-dana" class="w-full border p-2 rounded focus:ring-2 focus:ring-teal-400 outline-none" required value="${data ? data.target_dana : ''}"></div>
+                `;
             }
 
             fields.innerHTML = html;
@@ -1029,6 +1073,19 @@
                     await client.from('debts').update(newData).eq('id', id);
                 } else await client.from('debts').insert([newData]);
             }
+            else if (type === 'target') {
+                const newData = {
+                    nama_target: document.getElementById('input-target-nama').value,
+                    target_dana: parseInt(document.getElementById('input-target-dana').value),
+                    target_tahun: 2026 // Default fallback
+                };
+                if (id) {
+                    await client.from('financial_targets').update(newData).eq('id', id);
+                } else {
+                    newData.terkumpul = 0; // Target baru saldonya 0
+                    await client.from('financial_targets').insert([newData]);
+                }
+            }
 
             // Sync ulang data terbaru dari Supabase
             await fetchAllData();
@@ -1047,6 +1104,7 @@
             if (type === 'expense') data = db.expenses.find(x => x.id == id);
             if (type === 'user') data = db.users.find(x => x.id == id);
             if (type === 'debt') data = db.debts.find(x => x.id == id);
+            if (type === 'target') data = db.targets.find(x => x.id == id);
             if (data) openForm(type, data);
         }
 
@@ -1073,7 +1131,7 @@
             btn.disabled = true;
 
             const { type, id } = deleteTarget;
-            let tableName = type === 'income' ? 'incomes' : type === 'expense' ? 'expenses' : type === 'user' ? 'users' : 'debts';
+            let tableName = type === 'income' ? 'incomes' : type === 'expense' ? 'expenses' : type === 'user' ? 'users' : type === 'target' ? 'financial_targets' : 'debts';
             
             // Hapus data langsung dari Supabase
             await client.from(tableName).delete().eq('id', id);
@@ -1192,6 +1250,122 @@
             showToast('Batas anggaran berhasil diperbarui!');
         }
 
+        // --- TARGET TRANSAKSI LOGIC (SINKING FUNDS) ---
+        function openTargetTransModal(id, action) {
+            const target = db.targets.find(x => x.id == id);
+            if(!target) return;
+            
+            document.getElementById('tt-id').value = id;
+            document.getElementById('tt-action').value = action;
+            document.getElementById('tt-nominal').value = '';
+            
+            const modal = document.getElementById('target-trans-modal');
+            const content = document.getElementById('target-trans-modal-content');
+            const title = document.getElementById('tt-modal-title');
+            const btn = document.getElementById('tt-submit-btn');
+            const pakaiFields = document.getElementById('tt-pakai-fields');
+            
+            if(action === 'nabung') {
+                title.innerHTML = `<i class="fas fa-piggy-bank text-green-500"></i> Nabung: ${target.nama_target}`;
+                btn.innerText = 'Simpan Tabungan';
+                btn.className = 'px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition shadow';
+                pakaiFields.classList.add('hidden');
+                document.getElementById('tt-item').required = false;
+            } else {
+                title.innerHTML = `<i class="fas fa-shopping-cart text-orange-500"></i> Pakai Dana: ${target.nama_target}`;
+                btn.innerText = 'Cairkan & Catat';
+                btn.className = 'px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition shadow';
+                pakaiFields.classList.remove('hidden');
+                
+                // Populate kategori pengeluaran
+                const katArr = ['Tagihan utilitas', 'Kebutuhan pokok', 'Jajan', 'Sosial', 'Tabungan & investasi'];
+                document.getElementById('tt-kategori').innerHTML = katArr.map(k => `<option value="${k}">${k}</option>`).join('');
+                document.getElementById('tt-item').value = '';
+                document.getElementById('tt-item').required = true;
+                updateTargetTransSubkat();
+            }
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => content.classList.replace('scale-95', 'scale-100'), 10);
+        }
+
+        function closeTargetTransModal() {
+            const modal = document.getElementById('target-trans-modal');
+            const content = document.getElementById('target-trans-modal-content');
+            content.classList.replace('scale-100', 'scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 200);
+        }
+
+        function updateTargetTransSubkat() {
+            const kat = document.getElementById('tt-kategori').value;
+            const subOpts = subkatMap[kat].map(s => `<option value="${s}">${s}</option>`).join('');
+            document.getElementById('tt-subkategori').innerHTML = subOpts;
+        }
+
+        async function processTargetTrans(e) {
+            e.preventDefault();
+            const btn = document.getElementById('tt-submit-btn');
+            btn.disabled = true;
+            btn.innerText = "Memproses...";
+            
+            const id = document.getElementById('tt-id').value;
+            const action = document.getElementById('tt-action').value;
+            const nominal = parseInt(document.getElementById('tt-nominal').value);
+            const target = db.targets.find(x => x.id == id);
+            const today = new Date().toISOString().split('T')[0];
+            
+            if(action === 'nabung') {
+                // 1. Tambah saldo target di kantong
+                const newTerkumpul = (target.terkumpul || 0) + nominal;
+                await client.from('financial_targets').update({ terkumpul: newTerkumpul }).eq('id', id);
+                
+                // 2. Catat sebagai pengeluaran agar saldo cashflow rumah tangga berkurang dengan akurat
+                await client.from('expenses').insert([{
+                    tanggal: today,
+                    kategori: 'Tabungan & investasi',
+                    subkategori: 'Tabungan target',
+                    item: 'Nabung Alokasi: ' + target.nama_target,
+                    pic: 'bersama',
+                    jumlah: nominal
+                }]);
+                showToast('Berhasil menabung ke impian!');
+                
+            } else if (action === 'pakai') {
+                if(nominal > (target.terkumpul || 0)) {
+                    showToast('Saldo kantong tabungan tidak cukup!', true);
+                    btn.disabled = false;
+                    btn.innerText = "Coba Lagi";
+                    return;
+                }
+                
+                // 1. Kurangi saldo dari kantong target
+                const newTerkumpul = (target.terkumpul || 0) - nominal;
+                await client.from('financial_targets').update({ terkumpul: newTerkumpul }).eq('id', id);
+                
+                // 2. Suntik dana ke Saldo Utama (Pemasukan sementara hasil cairkan tabungan)
+                await client.from('incomes').insert([{
+                    tanggal: today,
+                    sumber: 'Pencairan Tabungan: ' + target.nama_target,
+                    jumlah: nominal
+                }]);
+                
+                // 3. Catat Pengeluaran sesungguhnya untuk barang yang dibeli (misal Kulkas)
+                await client.from('expenses').insert([{
+                    tanggal: today,
+                    kategori: document.getElementById('tt-kategori').value,
+                    subkategori: document.getElementById('tt-subkategori').value,
+                    item: document.getElementById('tt-item').value,
+                    pic: 'bersama',
+                    jumlah: nominal
+                }]);
+                showToast('Dana tabungan berhasil digunakan!');
+            }
+            
+            await fetchAllData();
+            renderTables();
+            closeTargetTransModal();
+        }
+
         // --- DASHBOARD & CHARTS ---
         function updateDashboard() {
             const totalIn = db.incomes.reduce((acc, curr) => acc + curr.jumlah, 0);
@@ -1202,14 +1376,50 @@
             document.getElementById('dash-out').innerText = formatRp(totalOut);
             document.getElementById('dash-saldo').innerText = formatRp(saldo);
 
-            // Update Target Progress (fallback jika data target belum ditarik)
-            const targetData = db.targets[0] || { target_dana: 1050000000, nama_target: 'Financial Freedom' };
-            const maxPersen = (saldo > 0) ? (saldo / targetData.target_dana) * 100 : 0;
-            const persentase = Math.min(maxPersen, 100).toFixed(4); // Maksimal bar 100%
-            
-            document.getElementById('target-progress').style.width = Math.min(maxPersen, 100) + '%';
-            document.getElementById('target-percentage').innerText = persentase + '%';
-            document.getElementById('target-text').innerText = `Terkumpul: ${formatRp(saldo)} dari ${formatRp(targetData.target_dana)}`;
+            // Render Target Tabungan (Multi-Impian)
+            const targetContainer = document.getElementById('target-container');
+            if(targetContainer) {
+                if(db.targets.length === 0) {
+                    targetContainer.innerHTML = '<div class="col-span-full text-center py-8 text-gray-500 bg-blue-50 rounded-xl border border-dashed border-blue-200">Belum ada target impian/tabungan. Klik tombol "Tambah Impian" untuk memulai!</div>';
+                } else {
+                    targetContainer.innerHTML = db.targets.map(item => {
+                        const terkumpul = item.terkumpul || 0;
+                        const targetDana = item.target_dana || 1;
+                        const progressPct = Math.min((terkumpul / targetDana) * 100, 100);
+                        
+                        return `
+                        <div class="border border-gray-100 p-5 rounded-xl shadow-sm hover:shadow-md transition bg-white flex flex-col relative overflow-hidden group">
+                            <div class="absolute top-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                                <button onclick="editData('target', ${item.id})" class="text-blue-500 bg-blue-50 hover:bg-blue-100 p-1.5 rounded"><i class="fas fa-edit"></i></button>
+                                <button onclick="confirmDelete('target', ${item.id})" class="text-red-500 bg-red-50 hover:bg-red-100 p-1.5 rounded"><i class="fas fa-trash"></i></button>
+                            </div>
+                            
+                            <h4 class="font-bold text-gray-800 text-lg mb-1 pr-16">${item.nama_target}</h4>
+                            
+                            <div class="mt-4 mb-1 flex justify-between items-end">
+                                <div>
+                                    <p class="text-xs text-gray-500 font-medium">Terkumpul</p>
+                                    <p class="font-bold text-lg ${progressPct >= 100 ? 'text-green-600' : 'text-blue-600'}">${formatRp(terkumpul)}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="w-full bg-gray-100 rounded-full h-2 mb-2 overflow-hidden shadow-inner">
+                                <div class="${progressPct >= 100 ? 'bg-green-500' : 'bg-gradient-to-r from-blue-400 to-blue-600'} h-2 rounded-full transition-all duration-1000" style="width: ${progressPct}%"></div>
+                            </div>
+                            
+                            <div class="flex justify-between text-xs text-gray-500 mb-5">
+                                <span>${progressPct.toFixed(1)}%</span>
+                                <span>Target: ${formatRp(targetDana)}</span>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-3 mt-auto">
+                                <button onclick="openTargetTransModal(${item.id}, 'nabung')" class="w-full py-2 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition text-sm font-bold border border-green-100 shadow-sm"><i class="fas fa-plus mr-1"></i> Nabung</button>
+                                <button onclick="openTargetTransModal(${item.id}, 'pakai')" class="w-full py-2 bg-orange-50 text-orange-700 rounded-lg hover:bg-orange-100 transition text-sm font-bold border border-orange-100 shadow-sm"><i class="fas fa-arrow-right mr-1"></i> Pakai</button>
+                            </div>
+                        </div>`;
+                    }).join('');
+                }
+            }
 
             // Render Budgeting Progress (Fitur Baru 1)
             const currentMonth = new Date().toISOString().slice(0, 7);
