@@ -1332,9 +1332,11 @@
                 
             } else if (action === 'pakai') {
                 if(nominal > (target.terkumpul || 0)) {
-                    showToast('Saldo kantong tabungan tidak cukup!', true);
+                    // PERBAIKAN: Berikan pop-up alert yang jelas kepada pengguna
+                    showToast('Gagal: Saldo tabungan tidak cukup!', true);
+                    alert(`Gagal Mencairkan Dana!\n\nSaldo impian "${target.nama_target}" saat ini hanya sebesar ${formatRp(target.terkumpul || 0)}.\nAnda tidak bisa menarik/mencairkan uang sejumlah ${formatRp(nominal)}.\n\nSilakan 'Nabung' terlebih dahulu ke kantong ini.`);
                     btn.disabled = false;
-                    btn.innerText = "Coba Lagi";
+                    btn.innerText = "Cairkan & Catat";
                     return;
                 }
                 
