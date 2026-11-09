@@ -1824,38 +1824,60 @@
             }
         }
 
-        // --- LOGIKA KLIK RINCIAN BUDGET ---
+       // --- LOGIKA KLIK RINCIAN BUDGET (VERSI REKAP SUBKATEGORI) ---
         function openBudgetDetailModal(kategori) {
             const modal = document.getElementById('budget-detail-modal');
             const content = document.getElementById('budget-detail-modal-content');
             const tbody = document.getElementById('budget-detail-tbody');
+            const thead = modal.querySelector('thead'); // Mengambil header tabel
             
-            document.getElementById('bd-modal-title').innerText = `Rincian: ${kategori}`;
+            document.getElementById('bd-modal-title').innerText = `Rekapitulasi: ${kategori}`;
             
             // Ambil data pengeluaran bulan ini dan saring berdasarkan kategori yang diklik
             const currentMonth = new Date().toISOString().slice(0, 7);
             const thisMonthExpenses = db.expenses.filter(e => e.tanggal.startsWith(currentMonth) && e.kategori === kategori);
             
-            // Urutkan dari tanggal terbaru ke terlama
-            thisMonthExpenses.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
-            
+            // --- LOGIKA BARU: GROUPING BERDASARKAN SUBKATEGORI ---
+            const subkatData = {};
             let total = 0;
-            if(thisMonthExpenses.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-500">Belum ada transaksi bulan ini.</td></tr>`;
+            
+            thisMonthExpenses.forEach(item => {
+                const sub = item.subkategori || 'Lainnya';
+                if (!subkatData[sub]) subkatData[sub] = 0;
+                subkatData[sub] += item.jumlah;
+                total += item.jumlah;
+            });
+
+            // Ubah Header Tabel agar sesuai dengan kolom Subkategori
+            thead.innerHTML = `
+                <tr class="bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-300 text-sm uppercase tracking-wider sticky top-0">
+                    <th class="p-3 border-b dark:border-gray-600 font-medium w-1/2">Subkategori</th>
+                    <th class="p-3 border-b dark:border-gray-600 font-medium text-right w-1/2">Total Pengeluaran</th>
+                </tr>
+            `;
+            
+            if(Object.keys(subkatData).length === 0) {
+                tbody.innerHTML = `<tr><td colspan="2" class="p-4 text-center text-gray-500">Belum ada pengeluaran bulan ini.</td></tr>`;
             } else {
-                tbody.innerHTML = thisMonthExpenses.map(item => {
-                    total += item.jumlah;
-                    // Format tanggal menjadi DD/MM
-                    const tglPendek = item.tanggal.slice(8,10) + '/' + item.tanggal.slice(5,7);
+                // Urutkan subkategori dari pengeluaran terbesar ke terkecil
+                const sortedSubkats = Object.keys(subkatData).sort((a, b) => subkatData[b] - subkatData[a]);
+                
+                tbody.innerHTML = sortedSubkats.map(sub => {
+                    const nominal = subkatData[sub];
+                    const pct = total > 0 ? ((nominal / total) * 100).toFixed(1) : 0;
+                    
                     return `
                         <tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition">
-                            <td class="p-3 whitespace-nowrap">${tglPendek}</td>
-                            <td class="p-3">
-                                <div class="font-medium">${item.item}</div>
-                                <div class="text-xs text-teal-600 dark:text-teal-400 mt-0.5">${item.subkategori || '-'}</div>
+                            <td class="p-3 align-middle">
+                                <div class="font-bold text-gray-800 dark:text-white mb-1.5">${sub}</div>
+                                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 shadow-inner">
+                                    <div class="bg-teal-500 h-1.5 rounded-full" style="width: ${pct}%"></div>
+                                </div>
                             </td>
-                            <td class="p-3 capitalize">${item.pic}</td>
-                            <td class="p-3 text-right font-bold text-red-500">${formatRp(item.jumlah)}</td>
+                            <td class="p-3 align-middle text-right">
+                                <div class="font-bold text-red-500 text-base">${formatRp(nominal)}</div>
+                                <div class="text-xs font-medium text-gray-500 dark:text-gray-400 mt-1">${pct}% dari total</div>
+                            </td>
                         </tr>
                     `;
                 }).join('');
