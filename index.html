@@ -1127,11 +1127,21 @@
                         <div><label class="block text-sm mb-1 text-gray-600">Nama Item (Catatan)</label>
                         <input type="text" id="input-item" class="w-full border p-2 rounded focus:ring-2 focus:ring-teal-400 outline-none" required value="${data ? data.item : ''}" placeholder="Cth: Bayar cicilan"></div>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div><label class="block text-sm mb-1 text-gray-600">PIC</label>
-                        <select id="input-pic" class="w-full border p-2 rounded focus:ring-2 focus:ring-teal-400 outline-none">${picOpts}</select></div>
-                        <div><label class="block text-sm mb-1 text-gray-600">Jumlah (Rp)</label>
-                        <input type="number" id="input-jumlah" class="w-full border p-2 rounded focus:ring-2 focus:ring-teal-400 outline-none" required value="${data ? data.jumlah : ''}"></div>
+                   <div class="grid grid-cols-2 gap-4">
+                        <div><label class="block text-sm mb-1 text-gray-600 dark:text-gray-300">PIC</label>
+                        <select id="input-pic" class="w-full border p-2 rounded focus:ring-2 focus:ring-teal-400 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white">${picOpts}</select></div>
+                        <div><label class="block text-sm mb-1 text-gray-600 dark:text-gray-300">Jumlah (Rp)</label>
+                        <input type="number" id="input-jumlah" class="w-full border p-2 rounded focus:ring-2 focus:ring-teal-400 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white" required value="${data ? data.jumlah : ''}"></div>
+                    </div>
+                    
+                    <!-- FITUR BARU: DROPDOWN LINK KE HUTANG -->
+                    <div class="${data ? 'hidden' : ''} mt-4 pt-4 border-t dark:border-gray-700">
+                        <label class="block text-sm mb-1 text-gray-600 dark:text-gray-300"><i class="fas fa-link text-orange-500 mr-1"></i> Terkait Pembayaran Hutang? (Opsional)</label>
+                        <select id="input-terkait-hutang" class="w-full border p-2 rounded focus:ring-2 focus:ring-teal-400 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                            <option value="">-- Bukan Bayar Hutang --</option>
+                            ${db.debts.map(d => `<option value="${d.id}">${d.nama} (${d.jenis})</option>`).join('')}
+                        </select>
+                        <p class="text-[11px] text-gray-500 mt-1">Jika dipilih, progress hutang/cicilan akan otomatis bertambah saat disimpan.</p>
                     </div>
                 `;
             } else if (type === 'user') {
@@ -1227,10 +1237,34 @@
                     pic: document.getElementById('input-pic').value,
                     jumlah: parseInt(document.getElementById('input-jumlah').value)
                 };
+                
+                // Tangkap pilihan dropdown hutang (jika ada)
+                const debtId = document.getElementById('input-terkait-hutang') ? document.getElementById('input-terkait-hutang').value : null;
+
                 if (id) {
                     await client.from('expenses').update(newData).eq('id', id);
-                } else await client.from('expenses').insert([newData]);
+                } else {
+                    await client.from('expenses').insert([newData]);
+                    
+                    // FITUR BARU: Update otomatis ke tabel hutang
+                    if (debtId) {
+                        const targetDebt = db.debts.find(d => d.id == debtId);
+                        if (targetDebt) {
+                            let debtUpdate = {};
+                            // Jika model Cicilan (seperti KPR), progress ditambah 1x bayar
+                            if (targetDebt.jenis === 'Cicilan') {
+                                debtUpdate = { tenor_terbayar: (targetDebt.tenor_terbayar || 0) + 1 };
+                            } 
+                            // Jika model Uang Bebas (seperti Kuliah), progress ditambah nominal rupiahnya
+                            else {
+                                debtUpdate = { nominal_terbayar: (targetDebt.nominal_terbayar || 0) + newData.jumlah };
+                            }
+                            await client.from('debts').update(debtUpdate).eq('id', targetDebt.id);
+                        }
+                    }
+                }
             }
+            
             else if (type === 'user') {
                 const newData = {
                     username: document.getElementById('input-username').value,
@@ -1810,6 +1844,14 @@
                             pic: 'bersama',
                             jumlah: r.jumlah
                         }]);
+
+                        // FITUR BARU: Jika robot membayar KPR, otomatis tambah progress 1x cicilan
+                        if (r.subkategori === 'KPR') {
+                            const kprDebt = db.debts.find(d => d.nama.toLowerCase().includes('kpr'));
+                            if (kprDebt) {
+                                await client.from('debts').update({ tenor_terbayar: (kprDebt.tenor_terbayar || 0) + 1 }).eq('id', kprDebt.id);
+                            }
+                        }
 
                         // 2. Tandai bahwa bulan ini sudah berhasil diproses
                         await client.from('recurring_transactions')
