@@ -299,6 +299,8 @@
                         </div>
                         <div class="flex flex-wrap gap-2">
                             <!-- Tombol Fitur Baru 4 & 5 -->
+                             <button onclick="openAutoBillModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow transition flex items-center gap-2 text-sm font-medium">
+                                🤖 Tagihan Otomatis
                             <button onclick="exportCSV('expense')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow transition flex items-center gap-2 text-sm font-medium">
                                 <i class="fas fa-file-excel"></i> Export CSV
                             </button>
@@ -1577,6 +1579,62 @@
             }
         });
 
+        // --- LOGIKA UI ROBOT TAGIHAN OTOMATIS ---
+        function openAutoBillModal() {
+            const modal = document.getElementById('autobill-modal');
+            const content = document.getElementById('autobill-modal-content');
+            
+            // Inisialisasi dropdown subkategori
+            updateAutoBillSubkat();
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => content.classList.replace('scale-95', 'scale-100'), 10);
+        }
+
+        function closeAutoBillModal() {
+            const modal = document.getElementById('autobill-modal');
+            const content = document.getElementById('autobill-modal-content');
+            content.classList.replace('scale-100', 'scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 200);
+        }
+
+        function updateAutoBillSubkat() {
+            const kat = document.getElementById('ab-kategori').value;
+            const subOpts = subkatMap[kat].map(s => `<option value="${s}">${s}</option>`).join('');
+            document.getElementById('ab-subkategori').innerHTML = subOpts;
+        }
+
+        async function saveAutoBill(e) {
+            e.preventDefault();
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.innerText = "Menyimpan...";
+            submitBtn.disabled = true;
+
+            const newData = {
+                kategori: document.getElementById('ab-kategori').value,
+                subkategori: document.getElementById('ab-subkategori').value,
+                item: document.getElementById('ab-item').value,
+                jumlah: parseInt(document.getElementById('ab-jumlah').value),
+                tanggal_rutin: parseInt(document.getElementById('ab-tanggal').value),
+                terakhir_diproses: null // Status bulan ini belum dipotong
+            };
+
+            // Simpan ke Supabase
+            const { error } = await client.from('recurring_transactions').insert([newData]);
+            
+            submitBtn.innerText = "Simpan Robot";
+            submitBtn.disabled = false;
+
+            if (error) {
+                showToast('Gagal menyimpan jadwal otomatis!', true);
+                console.error(error);
+            } else {
+                showToast('Jadwal tagihan otomatis berhasil ditambahkan!');
+                closeAutoBillModal();
+                e.target.reset(); // Bersihkan form setelah sukses
+            }
+        }
+
         // --- FITUR BARU: ROBOT TRANSAKSI OTOMATIS ---
         async function checkAndRunAutoBills() {
             const today = new Date();
@@ -1615,6 +1673,42 @@
             }
         }
         
+        <!-- MODAL TAGIHAN OTOMATIS (ROBOT) -->
+    <div id="autobill-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex justify-center items-center backdrop-blur-sm p-4 overflow-y-auto">
+        <div class="bg-white p-6 md:p-8 rounded-xl shadow-xl w-full max-w-md transform scale-95 transition-transform duration-200 dark:bg-gray-800" id="autobill-modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white"><i class="fas fa-robot text-blue-500 mr-2"></i> Atur Robot Tagihan</h3>
+                <button onclick="closeAutoBillModal()" class="text-gray-400 hover:text-red-500 transition text-2xl">&times;</button>
+            </div>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Sistem akan otomatis memotong uang Anda setiap tanggal yang ditentukan.</p>
+            <form id="autobill-form" onsubmit="saveAutoBill(event)" class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="block text-sm mb-1 text-gray-600 dark:text-gray-300">Kategori</label>
+                    <select id="ab-kategori" onchange="updateAutoBillSubkat()" class="w-full border p-2 rounded focus:ring-2 focus:ring-teal-400 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                        <option value="Tagihan utilitas">Tagihan utilitas</option>
+                        <option value="Kebutuhan pokok">Kebutuhan pokok</option>
+                    </select></div>
+                    <div><label class="block text-sm mb-1 text-gray-600 dark:text-gray-300">Subkategori</label>
+                    <select id="ab-subkategori" class="w-full border p-2 rounded focus:ring-2 focus:ring-teal-400 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white" required></select></div>
+                </div>
+                <div><label class="block text-sm mb-1 text-gray-600 dark:text-gray-300">Nama Tagihan</label>
+                <input type="text" id="ab-item" class="w-full border p-2 rounded focus:ring-2 focus:ring-teal-400 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white" required placeholder="Cth: Bayar KPR"></div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="block text-sm mb-1 text-gray-600 dark:text-gray-300">Nominal (Rp)</label>
+                    <input type="number" id="ab-jumlah" class="w-full border p-2 rounded focus:ring-2 focus:ring-teal-400 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white" required></div>
+                    <div><label class="block text-sm mb-1 text-gray-600 dark:text-gray-300">Tgl Rutin (1-31)</label>
+                    <input type="number" id="ab-tanggal" min="1" max="31" class="w-full border p-2 rounded focus:ring-2 focus:ring-teal-400 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white" required placeholder="Cth: 5"></div>
+                </div>
+
+                <div class="pt-4 flex justify-end gap-3 border-t dark:border-gray-700 mt-4">
+                    <button type="button" onclick="closeAutoBillModal()" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow">Simpan Robot</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     </script>
 </body>
 </html>
