@@ -393,53 +393,57 @@
                 <!-- VIEW: LAPORAN -->
                 <div id="view-laporan" class="page-view hidden space-y-6">
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-800">Laporan Keuangan</h1>
-                        <p class="text-gray-500 text-sm">Rekapitulasi otomatis bulanan dan tahunan beserta rincian pengeluaran.</p>
+                        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Laporan Keuangan</h1>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Rekapitulasi otomatis bulanan dan tahunan dengan desain interaktif modern.</p>
                     </div>
                     
-                    <div class="grid grid-cols-1 gap-6">
+                    <div class="grid grid-cols-1 gap-8">
                         <!-- Laporan Bulanan -->
-                        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-                            <div class="p-4 border-b bg-gray-50"><h3 class="font-bold text-gray-800">Laporan Bulanan Terperinci</h3></div>
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-left border-collapse text-sm">
+                        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                            <div class="p-5 border-b dark:border-gray-700 bg-white dark:bg-gray-800 flex justify-between items-center">
+                                <h3 class="font-bold text-gray-800 dark:text-white text-lg"><i class="fas fa-calendar-alt text-teal-500 mr-2"></i>Buku Kas Bulanan</h3>
+                            </div>
+                            <div class="overflow-x-auto pb-2">
+                                <table class="w-full text-left border-collapse min-w-max">
                                     <thead>
-                                        <tr class="bg-gray-100 text-gray-500 uppercase tracking-wider">
-                                            <th class="p-3 border-b font-medium">Bulan</th>
-                                            <th class="p-3 border-b font-medium">Pemasukan</th>
-                                            <th class="p-3 border-b font-medium">Total Keluar</th>
-                                            <th class="p-3 border-b font-medium text-red-500 bg-red-50">Tagihan Utilitas</th>
-                                            <th class="p-3 border-b font-medium text-blue-500 bg-blue-50">Kebutuhan Pokok</th>
-                                            <th class="p-3 border-b font-medium text-yellow-600 bg-yellow-50">Jajan</th>
-                                            <th class="p-3 border-b font-medium text-purple-500 bg-purple-50">Sosial</th>
-                                            <th class="p-3 border-b font-medium text-green-500 bg-green-50">Tabungan & Inv</th>
-                                            <th class="p-3 border-b font-medium text-right">Saldo Bersih</th>
+                                        <tr class="text-gray-400 dark:text-gray-500 text-[11px] uppercase tracking-widest bg-gray-50/50 dark:bg-gray-900/20">
+                                            <th class="p-4 font-semibold border-b dark:border-gray-700">Periode</th>
+                                            <th class="p-4 font-semibold border-b dark:border-gray-700">Pemasukan</th>
+                                            <th class="p-4 font-semibold border-b dark:border-gray-700">Total Keluar</th>
+                                            <th class="p-4 font-semibold border-b dark:border-gray-700 text-center">Tagihan</th>
+                                            <th class="p-4 font-semibold border-b dark:border-gray-700 text-center">Kebutuhan</th>
+                                            <th class="p-4 font-semibold border-b dark:border-gray-700 text-center">Jajan</th>
+                                            <th class="p-4 font-semibold border-b dark:border-gray-700 text-center">Sosial</th>
+                                            <th class="p-4 font-semibold border-b dark:border-gray-700 text-center">Tabungan</th>
+                                            <th class="p-4 font-semibold border-b dark:border-gray-700 text-right">Saldo Bersih</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="report-monthly-tbody" class="text-gray-700"></tbody>
+                                    <tbody id="report-monthly-tbody" class="text-gray-700 dark:text-gray-300"></tbody>
                                 </table>
                             </div>
                         </div>
 
                         <!-- Laporan Tahunan -->
-                        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-                            <div class="p-4 border-b bg-gray-50"><h3 class="font-bold text-gray-800">Laporan Tahunan Terperinci</h3></div>
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-left border-collapse text-sm">
+                        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                            <div class="p-5 border-b dark:border-gray-700 bg-white dark:bg-gray-800 flex justify-between items-center">
+                                <h3 class="font-bold text-gray-800 dark:text-white text-lg"><i class="fas fa-calendar-check text-indigo-500 mr-2"></i>Buku Kas Tahunan</h3>
+                            </div>
+                            <div class="overflow-x-auto pb-2">
+                                <table class="w-full text-left border-collapse min-w-max">
                                     <thead>
-                                        <tr class="bg-gray-100 text-gray-500 uppercase tracking-wider">
-                                            <th class="p-3 border-b font-medium">Tahun</th>
-                                            <th class="p-3 border-b font-medium">Pemasukan</th>
-                                            <th class="p-3 border-b font-medium">Total Keluar</th>
-                                            <th class="p-3 border-b font-medium text-red-500 bg-red-50">Tagihan Utilitas</th>
-                                            <th class="p-3 border-b font-medium text-blue-500 bg-blue-50">Kebutuhan Pokok</th>
-                                            <th class="p-3 border-b font-medium text-yellow-600 bg-yellow-50">Jajan</th>
-                                            <th class="p-3 border-b font-medium text-purple-500 bg-purple-50">Sosial</th>
-                                            <th class="p-3 border-b font-medium text-green-500 bg-green-50">Tabungan & Inv</th>
-                                            <th class="p-3 border-b font-medium text-right">Saldo Bersih</th>
+                                        <tr class="text-gray-400 dark:text-gray-500 text-[11px] uppercase tracking-widest bg-gray-50/50 dark:bg-gray-900/20">
+                                            <th class="p-4 font-semibold border-b dark:border-gray-700">Periode</th>
+                                            <th class="p-4 font-semibold border-b dark:border-gray-700">Pemasukan</th>
+                                            <th class="p-4 font-semibold border-b dark:border-gray-700">Total Keluar</th>
+                                            <th class="p-4 font-semibold border-b dark:border-gray-700 text-center">Tagihan</th>
+                                            <th class="p-4 font-semibold border-b dark:border-gray-700 text-center">Kebutuhan</th>
+                                            <th class="p-4 font-semibold border-b dark:border-gray-700 text-center">Jajan</th>
+                                            <th class="p-4 font-semibold border-b dark:border-gray-700 text-center">Sosial</th>
+                                            <th class="p-4 font-semibold border-b dark:border-gray-700 text-center">Tabungan</th>
+                                            <th class="p-4 font-semibold border-b dark:border-gray-700 text-right">Saldo Bersih</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="report-yearly-tbody" class="text-gray-700"></tbody>
+                                    <tbody id="report-yearly-tbody" class="text-gray-700 dark:text-gray-300"></tbody>
                                 </table>
                             </div>
                         </div>
@@ -918,7 +922,7 @@
             }
         }
 
-       // Kalkulasi rekap laporan langsung menggunakan JavaScript (VERSI MODERN & INTERAKTIF)
+       // Kalkulasi rekap laporan langsung menggunakan JavaScript (DESAIN BADGE MODERN)
         async function generateReports() {
             const monthlyData = {};
             const yearlyData = {};
@@ -946,67 +950,64 @@
             const sortedMonths = Object.keys(monthlyData).sort((a, b) => b.localeCompare(a));
             const sortedYears = Object.keys(yearlyData).sort((a, b) => b.localeCompare(a));
 
-            // Render ke Tabel HTML (Bulanan)
-            document.getElementById('report-monthly-tbody').innerHTML = sortedMonths.map(m => {
-                const d = monthlyData[m];
-                const saldo = d.masuk - d.keluar;
-                return `<tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition">
-                    <td class="p-3 font-bold text-gray-800 dark:text-white whitespace-nowrap">${m}</td>
-                    <td class="p-3">
-                        <button onclick="viewReportDetail('income', '${m}')" class="text-green-600 dark:text-green-400 font-medium hover:underline hover:text-green-800 flex items-center gap-1 transition" title="Lihat Rincian"><i class="fas fa-search text-[10px]"></i> ${formatRp(d.masuk)}</button>
-                    </td>
-                    <td class="p-3">
-                        <button onclick="viewReportDetail('expense', '${m}')" class="text-gray-800 dark:text-gray-200 font-bold hover:underline flex items-center gap-1 transition" title="Lihat Rincian"><i class="fas fa-search text-[10px]"></i> ${formatRp(d.keluar)}</button>
-                    </td>
-                    <td class="p-3 bg-red-50 dark:bg-red-900 dark:bg-opacity-20">
-                        <button onclick="viewReportDetail('expense', '${m}', 'Tagihan utilitas')" class="text-red-500 font-medium hover:underline">${formatRp(d['Tagihan utilitas'] || 0)}</button>
-                    </td>
-                    <td class="p-3 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20">
-                        <button onclick="viewReportDetail('expense', '${m}', 'Kebutuhan pokok')" class="text-blue-500 font-medium hover:underline">${formatRp(d['Kebutuhan pokok'] || 0)}</button>
-                    </td>
-                    <td class="p-3 bg-yellow-50 dark:bg-yellow-900 dark:bg-opacity-20">
-                        <button onclick="viewReportDetail('expense', '${m}', 'Jajan')" class="text-yellow-600 dark:text-yellow-500 font-medium hover:underline">${formatRp(d['Jajan'] || 0)}</button>
-                    </td>
-                    <td class="p-3 bg-purple-50 dark:bg-purple-900 dark:bg-opacity-20">
-                        <button onclick="viewReportDetail('expense', '${m}', 'Sosial')" class="text-purple-500 font-medium hover:underline">${formatRp(d['Sosial'] || 0)}</button>
-                    </td>
-                    <td class="p-3 bg-green-50 dark:bg-green-900 dark:bg-opacity-20">
-                        <button onclick="viewReportDetail('expense', '${m}', 'Tabungan & investasi')" class="text-green-500 font-medium hover:underline">${formatRp(d['Tabungan & investasi'] || 0)}</button>
-                    </td>
-                    <td class="p-3 font-bold text-right ${saldo >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}">${formatRp(saldo)}</td>
-                </tr>`;
-            }).join('');
+            // Fungsi Pembantu Pembuat Tombol Kapsul Modern
+            const createBadge = (type, val, cat, period) => {
+                let colorCls = '';
+                if(cat === 'Tagihan utilitas') colorCls = 'bg-red-50 text-red-600 ring-red-200 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:ring-red-900/50 dark:hover:bg-red-900/40';
+                else if(cat === 'Kebutuhan pokok') colorCls = 'bg-blue-50 text-blue-600 ring-blue-200 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-900/50 dark:hover:bg-blue-900/40';
+                else if(cat === 'Jajan') colorCls = 'bg-yellow-50 text-yellow-700 ring-yellow-200 hover:bg-yellow-100 dark:bg-yellow-900/20 dark:text-yellow-400 dark:ring-yellow-900/50 dark:hover:bg-yellow-900/40';
+                else if(cat === 'Sosial') colorCls = 'bg-purple-50 text-purple-600 ring-purple-200 hover:bg-purple-100 dark:bg-purple-900/20 dark:text-purple-400 dark:ring-purple-900/50 dark:hover:bg-purple-900/40';
+                else if(cat === 'Tabungan & investasi') colorCls = 'bg-emerald-50 text-emerald-600 ring-emerald-200 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:ring-emerald-900/50 dark:hover:bg-emerald-900/40';
+                
+                return `
+                <td class="p-3 border-b dark:border-gray-700 align-middle text-center">
+                    <button onclick="viewReportDetail('${type}', '${period}', '${cat}')" class="inline-flex justify-center items-center w-full px-3 py-1.5 rounded-full text-xs font-bold ring-1 transition-all hover:scale-105 active:scale-95 ${colorCls}" title="Klik untuk lihat rincian">
+                        ${formatRp(val)}
+                    </button>
+                </td>`;
+            };
 
-            // Render ke Tabel HTML (Tahunan)
-            document.getElementById('report-yearly-tbody').innerHTML = sortedYears.map(y => {
-                const d = yearlyData[y];
+            // Fungsi Pembantu Pembuat Baris Tabel
+            const createRow = (period, d) => {
                 const saldo = d.masuk - d.keluar;
-                return `<tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition">
-                    <td class="p-3 font-bold text-gray-800 dark:text-white whitespace-nowrap">${y}</td>
-                    <td class="p-3">
-                        <button onclick="viewReportDetail('income', '${y}')" class="text-green-600 dark:text-green-400 font-medium hover:underline flex items-center gap-1 transition" title="Lihat Rincian"><i class="fas fa-search text-[10px]"></i> ${formatRp(d.masuk)}</button>
+                const saldoCls = saldo >= 0 ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 ring-emerald-200 dark:ring-emerald-900/50' : 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 ring-red-200 dark:ring-red-900/50';
+                
+                return `
+                <tr class="hover:bg-gray-50/70 dark:hover:bg-gray-700/50 transition-colors group">
+                    <td class="p-4 border-b dark:border-gray-700 align-middle font-bold text-gray-800 dark:text-white whitespace-nowrap">
+                        <div class="flex items-center gap-2">
+                            <div class="w-1 h-5 rounded-full bg-teal-400 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            ${period}
+                        </div>
                     </td>
-                    <td class="p-3">
-                        <button onclick="viewReportDetail('expense', '${y}')" class="text-gray-800 dark:text-gray-200 font-bold hover:underline flex items-center gap-1 transition" title="Lihat Rincian"><i class="fas fa-search text-[10px]"></i> ${formatRp(d.keluar)}</button>
+                    <td class="p-3 border-b dark:border-gray-700 align-middle">
+                        <button onclick="viewReportDetail('income', '${period}')" class="inline-flex items-center gap-2 text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors" title="Rincian Pemasukan">
+                            <div class="p-1.5 rounded bg-emerald-50 dark:bg-emerald-900/30 text-[10px]"><i class="fas fa-arrow-down"></i></div>
+                            ${formatRp(d.masuk)}
+                        </button>
                     </td>
-                    <td class="p-3 bg-red-50 dark:bg-red-900 dark:bg-opacity-20">
-                        <button onclick="viewReportDetail('expense', '${y}', 'Tagihan utilitas')" class="text-red-500 font-medium hover:underline">${formatRp(d['Tagihan utilitas'] || 0)}</button>
+                    <td class="p-3 border-b dark:border-gray-700 align-middle">
+                        <button onclick="viewReportDetail('expense', '${period}')" class="inline-flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors" title="Semua Pengeluaran">
+                            <div class="p-1.5 rounded bg-gray-100 dark:bg-gray-700 text-[10px]"><i class="fas fa-arrow-up"></i></div>
+                            ${formatRp(d.keluar)}
+                        </button>
                     </td>
-                    <td class="p-3 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20">
-                        <button onclick="viewReportDetail('expense', '${y}', 'Kebutuhan pokok')" class="text-blue-500 font-medium hover:underline">${formatRp(d['Kebutuhan pokok'] || 0)}</button>
+                    ${createBadge('expense', d['Tagihan utilitas'] || 0, 'Tagihan utilitas', period)}
+                    ${createBadge('expense', d['Kebutuhan pokok'] || 0, 'Kebutuhan pokok', period)}
+                    ${createBadge('expense', d['Jajan'] || 0, 'Jajan', period)}
+                    ${createBadge('expense', d['Sosial'] || 0, 'Sosial', period)}
+                    ${createBadge('expense', d['Tabungan & investasi'] || 0, 'Tabungan & investasi', period)}
+                    <td class="p-3 border-b dark:border-gray-700 align-middle text-right">
+                        <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-bold ring-1 ${saldoCls}">
+                            ${formatRp(saldo)}
+                        </span>
                     </td>
-                    <td class="p-3 bg-yellow-50 dark:bg-yellow-900 dark:bg-opacity-20">
-                        <button onclick="viewReportDetail('expense', '${y}', 'Jajan')" class="text-yellow-600 dark:text-yellow-500 font-medium hover:underline">${formatRp(d['Jajan'] || 0)}</button>
-                    </td>
-                    <td class="p-3 bg-purple-50 dark:bg-purple-900 dark:bg-opacity-20">
-                        <button onclick="viewReportDetail('expense', '${y}', 'Sosial')" class="text-purple-500 font-medium hover:underline">${formatRp(d['Sosial'] || 0)}</button>
-                    </td>
-                    <td class="p-3 bg-green-50 dark:bg-green-900 dark:bg-opacity-20">
-                        <button onclick="viewReportDetail('expense', '${y}', 'Tabungan & investasi')" class="text-green-500 font-medium hover:underline">${formatRp(d['Tabungan & investasi'] || 0)}</button>
-                    </td>
-                    <td class="p-3 font-bold text-right ${saldo >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}">${formatRp(saldo)}</td>
                 </tr>`;
-            }).join('');
+            };
+
+            // Terapkan ke HTML
+            document.getElementById('report-monthly-tbody').innerHTML = sortedMonths.map(m => createRow(m, monthlyData[m])).join('');
+            document.getElementById('report-yearly-tbody').innerHTML = sortedYears.map(y => createRow(y, yearlyData[y])).join('');
         }
 
         // --- LOGIKA KLIK LAPORAN MENUJU RINCIAN (FILTER OTOMATIS) ---
