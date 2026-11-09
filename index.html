@@ -32,16 +32,30 @@
     }
 </script>
 <style>
-    /* CSS Otomatis untuk Mode Gelap */
+    <style>
+    /* CSS Otomatis untuk Mode Gelap yang Disempurnakan */
     html.dark body { background-color: #111827; color: #f3f4f6; }
-    html.dark .bg-white, html.dark .bg-gray-50 { background-color: #1f2937 !important; border-color: #374151 !important; }
-    html.dark .text-gray-800, html.dark .text-gray-900 { color: #f9fafb !important; }
+    html.dark .bg-white, html.dark .bg-gray-50, html.dark .bg-gray-100 { background-color: #1f2937 !important; border-color: #374151 !important; }
+    
+    /* Perbaikan Teks Tabel agar berwarna Putih/Terang */
+    html.dark .text-gray-800, html.dark .text-gray-900, html.dark .text-gray-700 { color: #f9fafb !important; }
     html.dark .text-gray-600, html.dark .text-gray-500 { color: #9ca3af !important; }
-    html.dark .border-gray-200, html.dark .border-gray-300 { border-color: #374151 !important; }
+    
+    html.dark .border-gray-100, html.dark .border-gray-200, html.dark .border-gray-300 { border-color: #374151 !important; }
     html.dark input, html.dark select { background-color: #374151 !important; color: #fff !important; border-color: #4b5563 !important; }
     html.dark table thead { background-color: #374151 !important; color: #e5e7eb !important; }
     html.dark tbody tr { border-color: #374151 !important; }
+    html.dark tbody tr:hover { background-color: #374151 !important; }
     html.dark .shadow-sm, html.dark .shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5); }
+    
+    /* Perbaikan Menu Sidebar Aktif & Tombol Warna-warni agar tidak menyilaukan */
+    html.dark .bg-teal-50 { background-color: rgba(20, 184, 166, 0.15) !important; }
+    html.dark .text-teal-600 { color: #2dd4bf !important; }
+    html.dark .bg-blue-50 { background-color: rgba(59, 130, 246, 0.15) !important; }
+    html.dark .bg-red-50 { background-color: rgba(239, 68, 68, 0.15) !important; }
+    html.dark .bg-yellow-50 { background-color: rgba(245, 158, 11, 0.15) !important; }
+    html.dark .bg-green-50 { background-color: rgba(16, 185, 129, 0.15) !important; }
+    html.dark .bg-purple-50 { background-color: rgba(139, 92, 246, 0.15) !important; }
 </style>
 </head>
 <body class="text-gray-800 h-screen flex overflow-hidden">
