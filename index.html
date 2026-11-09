@@ -918,76 +918,140 @@
             }
         }
 
-        // Kalkulasi rekap laporan langsung menggunakan JavaScript
+       // Kalkulasi rekap laporan langsung menggunakan JavaScript (VERSI MODERN & INTERAKTIF)
         async function generateReports() {
-            // 1. Siapkan wadah untuk data Bulanan dan Tahunan
             const monthlyData = {};
             const yearlyData = {};
 
-            // 2. Olah Pemasukan
             db.incomes.forEach(inc => {
-                const month = inc.tanggal.substring(0, 7); // YYYY-MM
-                const year = inc.tanggal.substring(0, 4);  // YYYY
-
+                const month = inc.tanggal.substring(0, 7);
+                const year = inc.tanggal.substring(0, 4);
                 if (!monthlyData[month]) monthlyData[month] = { masuk: 0, keluar: 0, 'Tagihan utilitas': 0, 'Kebutuhan pokok': 0, 'Jajan': 0, 'Sosial': 0, 'Tabungan & investasi': 0 };
                 if (!yearlyData[year]) yearlyData[year] = { masuk: 0, keluar: 0, 'Tagihan utilitas': 0, 'Kebutuhan pokok': 0, 'Jajan': 0, 'Sosial': 0, 'Tabungan & investasi': 0 };
-
                 monthlyData[month].masuk += inc.jumlah;
                 yearlyData[year].masuk += inc.jumlah;
             });
 
-            // 3. Olah Pengeluaran & Kategorinya
             db.expenses.forEach(exp => {
                 const month = exp.tanggal.substring(0, 7);
                 const year = exp.tanggal.substring(0, 4);
-
                 if (!monthlyData[month]) monthlyData[month] = { masuk: 0, keluar: 0, 'Tagihan utilitas': 0, 'Kebutuhan pokok': 0, 'Jajan': 0, 'Sosial': 0, 'Tabungan & investasi': 0 };
                 if (!yearlyData[year]) yearlyData[year] = { masuk: 0, keluar: 0, 'Tagihan utilitas': 0, 'Kebutuhan pokok': 0, 'Jajan': 0, 'Sosial': 0, 'Tabungan & investasi': 0 };
-
                 monthlyData[month].keluar += exp.jumlah;
                 yearlyData[year].keluar += exp.jumlah;
-
                 if (monthlyData[month][exp.kategori] !== undefined) monthlyData[month][exp.kategori] += exp.jumlah;
                 if (yearlyData[year][exp.kategori] !== undefined) yearlyData[year][exp.kategori] += exp.jumlah;
             });
 
-            // 4. Urutkan dari yang terbaru
             const sortedMonths = Object.keys(monthlyData).sort((a, b) => b.localeCompare(a));
             const sortedYears = Object.keys(yearlyData).sort((a, b) => b.localeCompare(a));
 
-            // 5. Render ke Tabel HTML (Bulanan)
+            // Render ke Tabel HTML (Bulanan)
             document.getElementById('report-monthly-tbody').innerHTML = sortedMonths.map(m => {
                 const d = monthlyData[m];
                 const saldo = d.masuk - d.keluar;
-                return `<tr class="border-b hover:bg-gray-50">
-                    <td class="p-3 font-bold">${m}</td>
-                    <td class="p-3 text-green-600 font-medium">${formatRp(d.masuk)}</td>
-                    <td class="p-3 text-gray-800 font-medium">${formatRp(d.keluar)}</td>
-                    <td class="p-3 text-red-500 bg-red-50 bg-opacity-50">${formatRp(d['Tagihan utilitas'] || 0)}</td>
-                    <td class="p-3 text-blue-500 bg-blue-50 bg-opacity-50">${formatRp(d['Kebutuhan pokok'] || 0)}</td>
-                    <td class="p-3 text-yellow-600 bg-yellow-50 bg-opacity-50">${formatRp(d['Jajan'] || 0)}</td>
-                    <td class="p-3 text-purple-500 bg-purple-50 bg-opacity-50">${formatRp(d['Sosial'] || 0)}</td>
-                    <td class="p-3 text-green-600 bg-green-50 bg-opacity-50">${formatRp(d['Tabungan & investasi'] || 0)}</td>
-                    <td class="p-3 font-bold text-right ${saldo >= 0 ? 'text-green-600' : 'text-red-600'}">${formatRp(saldo)}</td>
+                return `<tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition">
+                    <td class="p-3 font-bold text-gray-800 dark:text-white whitespace-nowrap">${m}</td>
+                    <td class="p-3">
+                        <button onclick="viewReportDetail('income', '${m}')" class="text-green-600 dark:text-green-400 font-medium hover:underline hover:text-green-800 flex items-center gap-1 transition" title="Lihat Rincian"><i class="fas fa-search text-[10px]"></i> ${formatRp(d.masuk)}</button>
+                    </td>
+                    <td class="p-3">
+                        <button onclick="viewReportDetail('expense', '${m}')" class="text-gray-800 dark:text-gray-200 font-bold hover:underline flex items-center gap-1 transition" title="Lihat Rincian"><i class="fas fa-search text-[10px]"></i> ${formatRp(d.keluar)}</button>
+                    </td>
+                    <td class="p-3 bg-red-50 dark:bg-red-900 dark:bg-opacity-20">
+                        <button onclick="viewReportDetail('expense', '${m}', 'Tagihan utilitas')" class="text-red-500 font-medium hover:underline">${formatRp(d['Tagihan utilitas'] || 0)}</button>
+                    </td>
+                    <td class="p-3 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20">
+                        <button onclick="viewReportDetail('expense', '${m}', 'Kebutuhan pokok')" class="text-blue-500 font-medium hover:underline">${formatRp(d['Kebutuhan pokok'] || 0)}</button>
+                    </td>
+                    <td class="p-3 bg-yellow-50 dark:bg-yellow-900 dark:bg-opacity-20">
+                        <button onclick="viewReportDetail('expense', '${m}', 'Jajan')" class="text-yellow-600 dark:text-yellow-500 font-medium hover:underline">${formatRp(d['Jajan'] || 0)}</button>
+                    </td>
+                    <td class="p-3 bg-purple-50 dark:bg-purple-900 dark:bg-opacity-20">
+                        <button onclick="viewReportDetail('expense', '${m}', 'Sosial')" class="text-purple-500 font-medium hover:underline">${formatRp(d['Sosial'] || 0)}</button>
+                    </td>
+                    <td class="p-3 bg-green-50 dark:bg-green-900 dark:bg-opacity-20">
+                        <button onclick="viewReportDetail('expense', '${m}', 'Tabungan & investasi')" class="text-green-500 font-medium hover:underline">${formatRp(d['Tabungan & investasi'] || 0)}</button>
+                    </td>
+                    <td class="p-3 font-bold text-right ${saldo >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}">${formatRp(saldo)}</td>
                 </tr>`;
             }).join('');
 
-            // 6. Render ke Tabel HTML (Tahunan)
+            // Render ke Tabel HTML (Tahunan)
             document.getElementById('report-yearly-tbody').innerHTML = sortedYears.map(y => {
                 const d = yearlyData[y];
                 const saldo = d.masuk - d.keluar;
-                return `<tr class="border-b hover:bg-gray-50">
-                    <td class="p-3 font-bold">${y}</td>
-                    <td class="p-3 text-green-600 font-medium">${formatRp(d.masuk)}</td>
-                    <td class="p-3 text-gray-800 font-medium">${formatRp(d.keluar)}</td>
-                    <td class="p-3 text-red-500 bg-red-50 bg-opacity-50">${formatRp(d['Tagihan utilitas'] || 0)}</td>
-                    <td class="p-3 text-blue-500 bg-blue-50 bg-opacity-50">${formatRp(d['Kebutuhan pokok'] || 0)}</td>
-                    <td class="p-3 text-yellow-600 bg-yellow-50 bg-opacity-50">${formatRp(d['Jajan'] || 0)}</td>
-                    <td class="p-3 text-purple-500 bg-purple-50 bg-opacity-50">${formatRp(d['Sosial'] || 0)}</td>
-                    <td class="p-3 text-green-600 bg-green-50 bg-opacity-50">${formatRp(d['Tabungan & investasi'] || 0)}</td>
-                    <td class="p-3 font-bold text-right ${saldo >= 0 ? 'text-green-600' : 'text-red-600'}">${formatRp(saldo)}</td>
+                return `<tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition">
+                    <td class="p-3 font-bold text-gray-800 dark:text-white whitespace-nowrap">${y}</td>
+                    <td class="p-3">
+                        <button onclick="viewReportDetail('income', '${y}')" class="text-green-600 dark:text-green-400 font-medium hover:underline flex items-center gap-1 transition" title="Lihat Rincian"><i class="fas fa-search text-[10px]"></i> ${formatRp(d.masuk)}</button>
+                    </td>
+                    <td class="p-3">
+                        <button onclick="viewReportDetail('expense', '${y}')" class="text-gray-800 dark:text-gray-200 font-bold hover:underline flex items-center gap-1 transition" title="Lihat Rincian"><i class="fas fa-search text-[10px]"></i> ${formatRp(d.keluar)}</button>
+                    </td>
+                    <td class="p-3 bg-red-50 dark:bg-red-900 dark:bg-opacity-20">
+                        <button onclick="viewReportDetail('expense', '${y}', 'Tagihan utilitas')" class="text-red-500 font-medium hover:underline">${formatRp(d['Tagihan utilitas'] || 0)}</button>
+                    </td>
+                    <td class="p-3 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20">
+                        <button onclick="viewReportDetail('expense', '${y}', 'Kebutuhan pokok')" class="text-blue-500 font-medium hover:underline">${formatRp(d['Kebutuhan pokok'] || 0)}</button>
+                    </td>
+                    <td class="p-3 bg-yellow-50 dark:bg-yellow-900 dark:bg-opacity-20">
+                        <button onclick="viewReportDetail('expense', '${y}', 'Jajan')" class="text-yellow-600 dark:text-yellow-500 font-medium hover:underline">${formatRp(d['Jajan'] || 0)}</button>
+                    </td>
+                    <td class="p-3 bg-purple-50 dark:bg-purple-900 dark:bg-opacity-20">
+                        <button onclick="viewReportDetail('expense', '${y}', 'Sosial')" class="text-purple-500 font-medium hover:underline">${formatRp(d['Sosial'] || 0)}</button>
+                    </td>
+                    <td class="p-3 bg-green-50 dark:bg-green-900 dark:bg-opacity-20">
+                        <button onclick="viewReportDetail('expense', '${y}', 'Tabungan & investasi')" class="text-green-500 font-medium hover:underline">${formatRp(d['Tabungan & investasi'] || 0)}</button>
+                    </td>
+                    <td class="p-3 font-bold text-right ${saldo >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}">${formatRp(saldo)}</td>
                 </tr>`;
             }).join('');
+        }
+
+        // --- LOGIKA KLIK LAPORAN MENUJU RINCIAN (FILTER OTOMATIS) ---
+        function viewReportDetail(type, period, category = '') {
+            if (type === 'income') {
+                // Atur filter bulan/tahun pemasukan
+                if (period.length === 7) { 
+                    document.getElementById('filter-month-income').value = period; // Format YYYY-MM
+                } else { 
+                    document.getElementById('filter-month-income').value = ''; // Jika diklik dari tahunan
+                }
+                filterIncome.month = period; 
+                
+                // Bersihkan pencarian nama
+                document.getElementById('search-income').value = ''; 
+                filterIncome.search = '';
+                
+                // Terapkan filter lalu lompat ke halaman
+                renderTables();
+                navigate('pemasukan');
+                showToast(`Menampilkan rincian pemasukan ${period}`);
+                
+            } else if (type === 'expense') {
+                // Atur filter bulan/tahun pengeluaran
+                if (period.length === 7) { 
+                    document.getElementById('filter-month-expense').value = period;
+                } else { 
+                    document.getElementById('filter-month-expense').value = '';
+                }
+                filterExpense.month = period;
+                
+                // Atur pencarian berdasarkan kategori yang diklik
+                document.getElementById('search-expense').value = category; 
+                filterExpense.search = category.toLowerCase(); // Filter akan membaca teks ini
+                
+                // Terapkan filter lalu lompat ke halaman
+                renderTables();
+                navigate('pengeluaran');
+                
+                if (category) {
+                    showToast(`Menampilkan rincian ${category} (${period})`);
+                } else {
+                    showToast(`Menampilkan semua pengeluaran (${period})`);
+                }
+            }
         }
 
         // Object untuk menyimpan daftar subkategori
