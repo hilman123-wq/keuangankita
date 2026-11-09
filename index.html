@@ -596,6 +596,39 @@
         </div>
     </div>
 
+<!-- BUDGET DETAIL MODAL (RINCIAN TRANSAKSI PER KATEGORI) -->
+    <div id="budget-detail-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex justify-center items-center backdrop-blur-sm p-4 overflow-y-auto">
+        <div class="bg-white p-6 md:p-8 rounded-xl shadow-xl w-full max-w-2xl transform scale-95 transition-transform duration-200 dark:bg-gray-800" id="budget-detail-modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800 dark:text-white" id="bd-modal-title">Rincian Transaksi</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Pengeluaran bulan ini</p>
+                </div>
+                <button onclick="closeBudgetDetailModal()" class="text-gray-400 hover:text-red-500 transition text-2xl">&times;</button>
+            </div>
+            
+            <div class="overflow-x-auto max-h-96 overflow-y-auto hide-scroll rounded-lg border dark:border-gray-700">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-300 text-sm uppercase tracking-wider sticky top-0">
+                            <th class="p-3 border-b dark:border-gray-600 font-medium">Tgl</th>
+                            <th class="p-3 border-b dark:border-gray-600 font-medium">Item</th>
+                            <th class="p-3 border-b dark:border-gray-600 font-medium">PIC</th>
+                            <th class="p-3 border-b dark:border-gray-600 font-medium text-right">Jumlah</th>
+                        </tr>
+                    </thead>
+                    <tbody id="budget-detail-tbody" class="text-gray-700 dark:text-gray-300 text-sm">
+                        <!-- Akan diisi otomatis oleh Javascript -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-4 pt-4 border-t dark:border-gray-700 flex justify-between items-center font-bold text-gray-800 dark:text-white text-lg">
+                <span>Total:</span>
+                <span id="bd-modal-total" class="text-red-500">Rp 0</span>
+            </div>
+        </div>
+    </div>
+
     <script>
         // --- SUPABASE CONFIG ---
         const supabaseUrl = 'https://gfllzeyidakcmogaizbx.supabase.co';
@@ -1525,7 +1558,7 @@
                 const barColor = isDanger ? 'bg-red-500' : (isWarning ? 'bg-yellow-400' : 'bg-teal-500');
 
                 budgetHtml += `
-                    <div class="mb-3">
+                    <div class="mb-3 p-3 -mx-3 rounded-xl cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-200" onclick="openBudgetDetailModal('${kat}')" title="Klik untuk lihat rincian">
                         <div class="flex justify-between text-sm mb-1">
                             <span class="font-bold text-gray-700">${kat}</span>
                             <span class="${isDanger ? 'text-red-600 font-bold' : 'text-gray-500'}">
@@ -1722,6 +1755,56 @@
             } catch (err) {
                 console.error("Gagal memproses tagihan otomatis:", err);
             }
+        }
+
+        // --- LOGIKA KLIK RINCIAN BUDGET ---
+        function openBudgetDetailModal(kategori) {
+            const modal = document.getElementById('budget-detail-modal');
+            const content = document.getElementById('budget-detail-modal-content');
+            const tbody = document.getElementById('budget-detail-tbody');
+            
+            document.getElementById('bd-modal-title').innerText = `Rincian: ${kategori}`;
+            
+            // Ambil data pengeluaran bulan ini dan saring berdasarkan kategori yang diklik
+            const currentMonth = new Date().toISOString().slice(0, 7);
+            const thisMonthExpenses = db.expenses.filter(e => e.tanggal.startsWith(currentMonth) && e.kategori === kategori);
+            
+            // Urutkan dari tanggal terbaru ke terlama
+            thisMonthExpenses.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+            
+            let total = 0;
+            if(thisMonthExpenses.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-500">Belum ada transaksi bulan ini.</td></tr>`;
+            } else {
+                tbody.innerHTML = thisMonthExpenses.map(item => {
+                    total += item.jumlah;
+                    // Format tanggal menjadi DD/MM
+                    const tglPendek = item.tanggal.slice(8,10) + '/' + item.tanggal.slice(5,7);
+                    return `
+                        <tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition">
+                            <td class="p-3 whitespace-nowrap">${tglPendek}</td>
+                            <td class="p-3">
+                                <div class="font-medium">${item.item}</div>
+                                <div class="text-xs text-teal-600 dark:text-teal-400 mt-0.5">${item.subkategori || '-'}</div>
+                            </td>
+                            <td class="p-3 capitalize">${item.pic}</td>
+                            <td class="p-3 text-right font-bold text-red-500">${formatRp(item.jumlah)}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+            
+            document.getElementById('bd-modal-total').innerText = formatRp(total);
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => content.classList.replace('scale-95', 'scale-100'), 10);
+        }
+
+        function closeBudgetDetailModal() {
+            const modal = document.getElementById('budget-detail-modal');
+            const content = document.getElementById('budget-detail-modal-content');
+            content.classList.replace('scale-100', 'scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 200);
         }
         
     </script>
