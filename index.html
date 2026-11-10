@@ -422,33 +422,64 @@
                 </div>
 
                 <!-- VIEW: LAPORAN -->
-                <div id="view-laporan" class="page-view hidden space-y-6">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                        <div>
-                            <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Laporan Rincian Bulanan</h1>
-                            <p class="text-gray-500 dark:text-gray-400 text-sm">Rekapitulasi pengeluaran per kategori sesuai standar perencanaan.</p>
-                        </div>
-                        
-                        <!-- Pemilih Bulan -->
-                        <div class="flex items-center gap-3 bg-white dark:bg-gray-800 p-2 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-                            <label class="text-sm font-bold text-gray-700 dark:text-gray-300 ml-2"><i class="fas fa-calendar-alt mr-1 text-purple-600 dark:text-purple-400"></i> Pilih Bulan:</label>
-                            <input type="month" id="report-month-picker" onchange="generateReports()" class="border-none bg-gray-50 dark:bg-gray-700 dark:text-white px-3 py-1.5 rounded-lg outline-none focus:ring-2 focus:ring-purple-500 cursor-pointer">
-                        </div>
+                <div id="view-laporan" class="page-view hidden space-y-8">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Laporan Keuangan</h1>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Ringkasan tren tahunan interaktif dan pembedahan rincian bulanan.</p>
                     </div>
                     
-                    <!-- Tabel Desain Ungu -->
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden max-w-3xl mx-auto mb-10">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-purple-700 dark:bg-purple-800 text-white tracking-wide">
-                                    <th class="p-4 font-bold text-lg w-2/3">Pengeluaran</th>
-                                    <th class="p-4 font-bold text-right text-lg">Bulanan (Rp)</th>
-                                </tr>
-                            </thead>
-                            <tbody id="report-detailed-tbody" class="text-gray-700 dark:text-gray-300">
-                                <!-- Akan diisi otomatis oleh Javascript -->
-                            </tbody>
-                        </table>
+                    <!-- 1. LAPORAN TAHUNAN (Tren Kapsul Modern) -->
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                        <div class="p-5 border-b dark:border-gray-700 bg-white dark:bg-gray-800 flex justify-between items-center">
+                            <h3 class="font-bold text-gray-800 dark:text-white text-lg"><i class="fas fa-chart-line text-indigo-500 mr-2"></i>Tren Pengeluaran Tahunan</h3>
+                        </div>
+                        <div class="overflow-x-auto pb-2">
+                            <table class="w-full text-left border-collapse min-w-max">
+                                <thead>
+                                    <tr class="text-gray-600 dark:text-gray-200 text-xs uppercase tracking-widest bg-gray-100 dark:bg-gray-700 border-b dark:border-gray-600">
+                                        <th class="p-4 font-bold">Tahun</th>
+                                        <th class="p-4 font-bold">Pemasukan</th>
+                                        <th class="p-4 font-bold">Total Keluar</th>
+                                        <th class="p-4 font-bold text-center">Tagihan</th>
+                                        <th class="p-4 font-bold text-center">Kebutuhan</th>
+                                        <th class="p-4 font-bold text-center">Jajan</th>
+                                        <th class="p-4 font-bold text-center">Sosial</th>
+                                        <th class="p-4 font-bold text-center">Tabungan</th>
+                                        <th class="p-4 font-bold text-right">Saldo Bersih</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="report-yearly-tbody" class="text-gray-700 dark:text-gray-300"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 2. LAPORAN BULANAN (Hierarki Vertikal Ungu) -->
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-5 md:p-8">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                            <div>
+                                <h3 class="font-bold text-gray-800 dark:text-white text-lg"><i class="fas fa-search-dollar text-purple-600 mr-2"></i>Rincian Pengeluaran Bulanan</h3>
+                                <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Evaluasi arus kas secara mendalam per subkategori.</p>
+                            </div>
+                            <!-- Pemilih Bulan -->
+                            <div class="flex items-center gap-3 bg-gray-50 dark:bg-gray-900 p-2 rounded-xl shadow-inner border border-gray-200 dark:border-gray-700">
+                                <label class="text-sm font-bold text-gray-700 dark:text-gray-300 ml-2"><i class="fas fa-calendar-alt mr-1 text-purple-600 dark:text-purple-400"></i> Bulan:</label>
+                                <input type="month" id="report-month-picker" onchange="generateReports()" class="border-none bg-white dark:bg-gray-800 dark:text-white px-3 py-1.5 rounded-lg outline-none focus:ring-2 focus:ring-purple-500 cursor-pointer shadow-sm">
+                            </div>
+                        </div>
+                        
+                        <div class="rounded-xl overflow-hidden border border-purple-200 dark:border-purple-800/50 max-w-3xl mx-auto shadow-md">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-purple-700 dark:bg-purple-800 text-white tracking-wide">
+                                        <th class="p-4 font-bold text-lg w-2/3">Kategori & Subkategori</th>
+                                        <th class="p-4 font-bold text-right text-lg">Nominal (Rp)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="report-detailed-tbody" class="text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800">
+                                    <!-- Akan diisi otomatis oleh Javascript -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
@@ -924,89 +955,143 @@
             }
         }
 
-       // --- FUNGSI GENERATE LAPORAN (DESAIN TABEL HIERARKI UNGU) ---
+     // --- FUNGSI GENERATE LAPORAN (KOMBINASI TAHUNAN KAPSUL & BULANAN UNGU) ---
         async function generateReports() {
+            // 1. SETUP PEMILIH BULAN
             const monthInput = document.getElementById('report-month-picker');
             let selectedMonth = monthInput.value;
             if (!selectedMonth) {
-                selectedMonth = new Date().toISOString().slice(0, 7); // Default ke bulan ini (YYYY-MM)
+                selectedMonth = new Date().toISOString().slice(0, 7);
                 monthInput.value = selectedMonth;
             }
 
-            // Ambil data Pemasukan & Pengeluaran KHUSUS bulan yang dipilih di kalender atas
-            const incomes = db.incomes.filter(i => i.tanggal.startsWith(selectedMonth));
-            const expenses = db.expenses.filter(e => e.tanggal.startsWith(selectedMonth));
+            // =========================================================
+            // 2. OLAH & RENDER LAPORAN TAHUNAN (Desain Tombol Kapsul)
+            // =========================================================
+            const yearlyData = {};
+            db.incomes.forEach(inc => {
+                const year = inc.tanggal.substring(0, 4);
+                if (!yearlyData[year]) yearlyData[year] = { masuk: 0, keluar: 0, 'Tagihan utilitas': 0, 'Kebutuhan pokok': 0, 'Jajan': 0, 'Sosial': 0, 'Tabungan & investasi': 0 };
+                yearlyData[year].masuk += inc.jumlah;
+            });
+            db.expenses.forEach(exp => {
+                const year = exp.tanggal.substring(0, 4);
+                if (!yearlyData[year]) yearlyData[year] = { masuk: 0, keluar: 0, 'Tagihan utilitas': 0, 'Kebutuhan pokok': 0, 'Jajan': 0, 'Sosial': 0, 'Tabungan & investasi': 0 };
+                yearlyData[year].keluar += exp.jumlah;
+                if (yearlyData[year][exp.kategori] !== undefined) yearlyData[year][exp.kategori] += exp.jumlah;
+            });
 
-            const totalIncome = incomes.reduce((sum, item) => sum + item.jumlah, 0);
-            const totalExpense = expenses.reduce((sum, item) => sum + item.jumlah, 0);
+            const sortedYears = Object.keys(yearlyData).sort((a, b) => b.localeCompare(a));
+
+            const createBadge = (type, val, cat, period) => {
+                let colorCls = '';
+                if(cat === 'Tagihan utilitas') colorCls = 'bg-red-50 text-red-600 ring-red-200 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:ring-red-900/50';
+                else if(cat === 'Kebutuhan pokok') colorCls = 'bg-blue-50 text-blue-600 ring-blue-200 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-900/50';
+                else if(cat === 'Jajan') colorCls = 'bg-yellow-50 text-yellow-700 ring-yellow-200 hover:bg-yellow-100 dark:bg-yellow-900/20 dark:text-yellow-400 dark:ring-yellow-900/50';
+                else if(cat === 'Sosial') colorCls = 'bg-purple-50 text-purple-600 ring-purple-200 hover:bg-purple-100 dark:bg-purple-900/20 dark:text-purple-400 dark:ring-purple-900/50';
+                else if(cat === 'Tabungan & investasi') colorCls = 'bg-emerald-50 text-emerald-600 ring-emerald-200 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:ring-emerald-900/50';
+                
+                return `<td class="p-3 border-b dark:border-gray-700 align-middle text-center">
+                    <button onclick="viewReportDetail('${type}', '${period}', '${cat}')" class="inline-flex justify-center items-center w-full px-3 py-1.5 rounded-full text-xs font-bold ring-1 transition-all hover:scale-105 active:scale-95 ${colorCls}" title="Klik filter rincian">
+                        ${formatRp(val)}
+                    </button>
+                </td>`;
+            };
+
+            const createYearlyRow = (period, d) => {
+                const saldo = d.masuk - d.keluar;
+                const saldoCls = saldo >= 0 ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 ring-emerald-200 dark:ring-emerald-900/50' : 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 ring-red-200 dark:ring-red-900/50';
+                return `<tr class="hover:bg-gray-50/70 dark:hover:bg-gray-700/50 transition-colors group">
+                    <td class="p-4 border-b dark:border-gray-700 align-middle font-bold text-gray-800 dark:text-white whitespace-nowrap">${period}</td>
+                    <td class="p-3 border-b dark:border-gray-700 align-middle">
+                        <button onclick="viewReportDetail('income', '${period}')" class="inline-flex items-center gap-2 text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 transition-colors">
+                            <i class="fas fa-search text-[10px]"></i> ${formatRp(d.masuk)}
+                        </button>
+                    </td>
+                    <td class="p-3 border-b dark:border-gray-700 align-middle">
+                        <button onclick="viewReportDetail('expense', '${period}')" class="inline-flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-300 hover:text-gray-900 transition-colors">
+                            <i class="fas fa-search text-[10px]"></i> ${formatRp(d.keluar)}
+                        </button>
+                    </td>
+                    ${createBadge('expense', d['Tagihan utilitas'] || 0, 'Tagihan utilitas', period)}
+                    ${createBadge('expense', d['Kebutuhan pokok'] || 0, 'Kebutuhan pokok', period)}
+                    ${createBadge('expense', d['Jajan'] || 0, 'Jajan', period)}
+                    ${createBadge('expense', d['Sosial'] || 0, 'Sosial', period)}
+                    ${createBadge('expense', d['Tabungan & investasi'] || 0, 'Tabungan & investasi', period)}
+                    <td class="p-3 border-b dark:border-gray-700 align-middle text-right">
+                        <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-bold ring-1 ${saldoCls}">
+                            ${formatRp(saldo)}
+                        </span>
+                    </td>
+                </tr>`;
+            };
+
+            document.getElementById('report-yearly-tbody').innerHTML = sortedYears.map(y => createYearlyRow(y, yearlyData[y])).join('');
+
+            // =========================================================
+            // 3. OLAH & RENDER LAPORAN BULANAN (Desain Hierarki Ungu)
+            // =========================================================
+            const monthIncomes = db.incomes.filter(i => i.tanggal.startsWith(selectedMonth));
+            const monthExpenses = db.expenses.filter(e => e.tanggal.startsWith(selectedMonth));
+
+            const totalIncome = monthIncomes.reduce((sum, item) => sum + item.jumlah, 0);
+            const totalExpense = monthExpenses.reduce((sum, item) => sum + item.jumlah, 0);
             const netBalance = totalIncome - totalExpense;
 
-            // Kelompokkan pengeluaran berdasarkan Kategori lalu Subkategori
             const grouped = {};
             const categoryOrder = ['Kebutuhan pokok', 'Tagihan utilitas', 'Pendidikan', 'Kesehatan', 'Dana Darurat', 'Tabungan & investasi', 'Jajan', 'Sosial', 'Lainnya'];
             
-            expenses.forEach(exp => {
+            monthExpenses.forEach(exp => {
                 const cat = exp.kategori || 'Lainnya';
                 const sub = exp.subkategori || exp.item || 'Lainnya';
-                
                 if (!grouped[cat]) grouped[cat] = { total: 0, items: {} };
                 if (!grouped[cat].items[sub]) grouped[cat].items[sub] = 0;
-                
                 grouped[cat].items[sub] += exp.jumlah;
                 grouped[cat].total += exp.jumlah;
             });
 
-            const tbody = document.getElementById('report-detailed-tbody');
-            let html = '';
-
-            // Mulai Mencetak Baris ke dalam Tabel
+            let htmlDetailed = '';
             categoryOrder.forEach(cat => {
                 if (grouped[cat]) {
-                    // 1. Judul Kategori (Teks Ungu)
-                    html += `
-                        <tr class="bg-white dark:bg-gray-800">
-                            <td colspan="2" class="px-4 py-3 font-bold text-purple-800 dark:text-purple-400 border-b dark:border-gray-700">${cat}</td>
-                        </tr>
-                    `;
+                    // Header Kategori
+                    htmlDetailed += `<tr class="bg-purple-50/50 dark:bg-gray-900/50">
+                        <td colspan="2" class="px-4 py-3 font-bold text-purple-800 dark:text-purple-400 border-b dark:border-gray-700 text-sm tracking-wide">${cat}</td>
+                    </tr>`;
                     
-                    // 2. Baris Item / Subkategori
+                    // Rincian Subkategori
                     const subs = Object.keys(grouped[cat].items).sort((a,b) => grouped[cat].items[b] - grouped[cat].items[a]);
                     subs.forEach(sub => {
-                        html += `
-                            <tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                <td class="px-4 py-2.5 pl-8 text-sm">${sub}</td>
-                                <td class="px-4 py-2.5 text-right font-medium text-sm">${formatRp(grouped[cat].items[sub])}</td>
-                            </tr>
-                        `;
+                        htmlDetailed += `<tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                            <td class="px-4 py-2 pl-8 text-sm text-gray-700 dark:text-gray-300 border-l-[3px] border-transparent hover:border-purple-400">${sub}</td>
+                            <td class="px-4 py-2 text-right font-medium text-sm text-gray-700 dark:text-gray-300">${formatRp(grouped[cat].items[sub])}</td>
+                        </tr>`;
                     });
 
-                    // 3. Subtotal per Kategori (Jumlah)
-                    html += `
-                        <tr class="border-b-2 border-purple-200 dark:border-purple-800 bg-white dark:bg-gray-800">
-                            <td class="px-4 py-3 pl-8 font-bold text-purple-800 dark:text-purple-400 text-sm">Jumlah</td>
-                            <td class="px-4 py-3 text-right font-bold text-purple-800 dark:text-purple-400 text-sm">${formatRp(grouped[cat].total)}</td>
-                        </tr>
-                    `;
+                    // Subtotal
+                    htmlDetailed += `<tr class="border-b-2 border-purple-200 dark:border-purple-800/50 bg-white dark:bg-gray-800">
+                        <td class="px-4 py-3 pl-8 font-bold text-purple-700 dark:text-purple-400 text-sm">Subtotal ${cat}</td>
+                        <td class="px-4 py-3 text-right font-bold text-purple-700 dark:text-purple-400 text-sm">${formatRp(grouped[cat].total)}</td>
+                    </tr>`;
                 }
             });
 
             if (Object.keys(grouped).length === 0) {
-                html += `<tr><td colspan="2" class="p-8 text-center text-gray-500">Tidak ada data pengeluaran di bulan ini.</td></tr>`;
+                htmlDetailed += `<tr><td colspan="2" class="p-8 text-center text-gray-500">Tidak ada pengeluaran di bulan ini.</td></tr>`;
             }
 
-            // 4. Footer Total Pengeluaran & Sisa Pendapatan (Latar Ungu Muda)
-            html += `
+            // Footer (Total Keluar & Sisa/Defisit)
+            htmlDetailed += `
                 <tr class="bg-purple-100 dark:bg-purple-900/60 border-b border-purple-200 dark:border-purple-800">
-                    <td class="p-4 font-bold text-purple-900 dark:text-purple-100 text-base tracking-wide">Total pengeluaran</td>
+                    <td class="p-4 font-bold text-purple-900 dark:text-purple-100 text-base tracking-wide">Total Pengeluaran</td>
                     <td class="p-4 text-right font-bold text-purple-900 dark:text-purple-100 text-base">${formatRp(totalExpense)}</td>
                 </tr>
                 <tr class="bg-purple-200 dark:bg-purple-800/80">
-                    <td class="p-4 font-bold text-purple-900 dark:text-white text-base tracking-wide">Sisa pendapatan</td>
+                    <td class="p-4 font-bold text-purple-900 dark:text-white text-base tracking-wide">Sisa Pendapatan (Saldo)</td>
                     <td class="p-4 text-right font-bold text-purple-900 dark:text-white text-base">${formatRp(netBalance)}</td>
                 </tr>
             `;
 
-            tbody.innerHTML = html;
+            document.getElementById('report-detailed-tbody').innerHTML = htmlDetailed;
         }
 
         // --- LOGIKA KLIK LAPORAN MENUJU RINCIAN (FILTER OTOMATIS) ---
