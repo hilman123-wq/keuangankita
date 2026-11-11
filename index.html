@@ -718,6 +718,23 @@
         let reportChartYearly = null;
         let reportChartMonthly = null;
         
+        // --- FITUR BARU: AUTO LOGIN / INGAT SAYA ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            const savedUser = localStorage.getItem('nizamnuha_user');
+            if (savedUser) {
+                // Jika ada memori login, langsung masuk tanpa animasi layar login
+                currentUser = JSON.parse(savedUser);
+                document.getElementById('view-login').classList.add('hidden');
+                document.getElementById('app-layout').classList.remove('hidden');
+                
+                document.getElementById('current-user-name').innerText = currentUser.username.charAt(0).toUpperCase() + currentUser.username.slice(1);
+                document.getElementById('user-avatar').innerText = currentUser.username.charAt(0).toUpperCase();
+                
+                // Jalankan robot & inisialisasi aplikasi
+                await checkAndRunAutoBills();
+                initApp();
+            }
+        });
 
         // --- FITUR BARU: STATE & CONFIG ---
         let filterIncome = { month: '', search: '' };
@@ -774,6 +791,9 @@
 
             if (data) {
                 currentUser = data;
+
+                // FITUR BARU: Simpan data sesi ke memori HP
+                localStorage.setItem('nizamnuha_user', JSON.stringify(data));
                 errEl.classList.add('hidden');
                 document.getElementById('view-login').style.opacity = '0';
                 
@@ -797,6 +817,8 @@
 
         function logout() {
             currentUser = null;
+            // FITUR BARU: Hapus memori sesi di HP
+            localStorage.removeItem('nizamnuha_user');
             document.getElementById('app-layout').classList.add('hidden');
             const loginView = document.getElementById('view-login');
             loginView.classList.remove('hidden');
