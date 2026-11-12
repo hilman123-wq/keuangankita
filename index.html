@@ -1076,13 +1076,14 @@
 
         // --- FUNGSI GENERATE LAPORAN LENGKAP ---
         async function generateReports() {
-           const dStart = document.getElementById('report-date-start');
+            // 1. SET SIKLUS TANGGAL (Tgl 5 - Tgl 4)
+            const dStart = document.getElementById('report-date-start');
             const dEnd = document.getElementById('report-date-end');
 
-            // Jika kosong, set otomatis ke siklus gajian (Tgl 5 sampai Tgl 4 bulan depan)
+            if (!dStart || !dEnd) return; // Mencegah error jika elemen belum dirender
+
             if (!dStart.value || !dEnd.value) {
                 const today = new Date();
-                // Jika hari ini masih di bawah tgl 5, berarti masih ikut siklus gajian bulan sebelumnya
                 let startMonth = today.getDate() >= 5 ? today.getMonth() : today.getMonth() - 1;
                 let year = today.getFullYear();
                 if (startMonth < 0) { startMonth = 11; year--; }
@@ -1098,18 +1099,12 @@
 
             const startVal = dStart.value;
             const endVal = dEnd.value;
-            document.getElementById('print-month-title').innerText = `Siklus: ${startVal} s/d ${endVal}`;
-
-            // ... (Lanjutkan kode filter tabel Anda yang tadinya pakai .startsWith, ubah filternya jadi begini:)
-            const monthIncomes = db.incomes.filter(i => i.tanggal >= startVal && i.tanggal <= endVal);
-            const monthExpenses = db.expenses.filter(e => e.tanggal >= startVal && e.tanggal <= endVal);
-            }
             
-            // Ubah judul laporan cetak
-            document.getElementById('print-month-title').innerText = `Periode: ${selectedMonth}`;
+            const printTitle = document.getElementById('print-month-title');
+            if(printTitle) printTitle.innerText = `Siklus: ${startVal} s/d ${endVal}`;
 
             // =========================================================
-            // 1. OLAH & RENDER LAPORAN TAHUNAN
+            // 2. OLAH & RENDER LAPORAN TAHUNAN (Kapsul & Grafik Bar)
             // =========================================================
             const yearlyData = {};
             db.incomes.forEach(inc => {
@@ -1126,7 +1121,6 @@
 
             const sortedYears = Object.keys(yearlyData).sort((a, b) => b.localeCompare(a));
             
-            // Render Tabel Tahunan
             const createBadge = (type, val, cat, period) => {
                 let colorCls = 'bg-gray-100 text-gray-600 ring-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:ring-gray-600';
                 if(cat === 'Tagihan utilitas') colorCls = 'bg-red-50 text-red-600 ring-red-200 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:ring-red-900/50';
@@ -1139,43 +1133,48 @@
                 </td>`;
             };
 
-            document.getElementById('report-yearly-tbody').innerHTML = sortedYears.map(y => {
-                const d = yearlyData[y];
-                const saldo = d.masuk - d.keluar;
-                const saldoCls = saldo >= 0 ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 ring-emerald-200 dark:ring-emerald-900/50' : 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 ring-red-200 dark:ring-red-900/50';
-                return `<tr class="hover:bg-gray-50/70 dark:hover:bg-gray-700/50 transition-colors">
-                    <td class="p-4 border-b dark:border-gray-700 font-bold">${y}</td>
-                    <td class="p-3 border-b dark:border-gray-700"><button onclick="viewReportDetail('income', '${y}')" class="font-bold text-emerald-600 dark:text-emerald-400 hover:underline">${formatRp(d.masuk)}</button></td>
-                    <td class="p-3 border-b dark:border-gray-700"><button onclick="viewReportDetail('expense', '${y}')" class="font-bold text-gray-700 dark:text-gray-300 hover:underline">${formatRp(d.keluar)}</button></td>
-                    ${createBadge('expense', d['Tagihan utilitas'] || 0, 'Tagihan utilitas', y)}
-                    ${createBadge('expense', d['Kebutuhan pokok'] || 0, 'Kebutuhan pokok', y)}
-                    ${createBadge('expense', d['Jajan'] || 0, 'Jajan', y)}
-                    ${createBadge('expense', d['Sosial'] || 0, 'Sosial', y)}
-                    ${createBadge('expense', d['Tabungan & investasi'] || 0, 'Tabungan & investasi', y)}
-                    <td class="p-3 border-b dark:border-gray-700 text-right"><span class="px-3 py-1.5 rounded-lg text-sm font-bold ring-1 ${saldoCls}">${formatRp(saldo)}</span></td>
-                </tr>`;
-            }).join('');
+            const yearlyTbody = document.getElementById('report-yearly-tbody');
+            if (yearlyTbody) {
+                yearlyTbody.innerHTML = sortedYears.map(y => {
+                    const d = yearlyData[y];
+                    const saldo = d.masuk - d.keluar;
+                    const saldoCls = saldo >= 0 ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 ring-emerald-200 dark:ring-emerald-900/50' : 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 ring-red-200 dark:ring-red-900/50';
+                    return `<tr class="hover:bg-gray-50/70 dark:hover:bg-gray-700/50 transition-colors">
+                        <td class="p-4 border-b dark:border-gray-700 font-bold">${y}</td>
+                        <td class="p-3 border-b dark:border-gray-700"><button onclick="viewReportDetail('income', '${y}')" class="font-bold text-emerald-600 dark:text-emerald-400 hover:underline">${formatRp(d.masuk)}</button></td>
+                        <td class="p-3 border-b dark:border-gray-700"><button onclick="viewReportDetail('expense', '${y}')" class="font-bold text-gray-700 dark:text-gray-300 hover:underline">${formatRp(d.keluar)}</button></td>
+                        ${createBadge('expense', d['Tagihan utilitas'] || 0, 'Tagihan utilitas', y)}
+                        ${createBadge('expense', d['Kebutuhan pokok'] || 0, 'Kebutuhan pokok', y)}
+                        ${createBadge('expense', d['Jajan'] || 0, 'Jajan', y)}
+                        ${createBadge('expense', d['Sosial'] || 0, 'Sosial', y)}
+                        ${createBadge('expense', d['Tabungan & investasi'] || 0, 'Tabungan & investasi', y)}
+                        <td class="p-3 border-b dark:border-gray-700 text-right"><span class="px-3 py-1.5 rounded-lg text-sm font-bold ring-1 ${saldoCls}">${formatRp(saldo)}</span></td>
+                    </tr>`;
+                }).join('');
+            }
 
-            // FITUR BARU: Render Grafik Garis (Bar) Tahunan
-            const ctxYearly = document.getElementById('chartYearly').getContext('2d');
-            if(reportChartYearly) reportChartYearly.destroy();
-            reportChartYearly = new Chart(ctxYearly, {
-                type: 'bar',
-                data: {
-                    labels: sortedYears,
-                    datasets: [
-                        { label: 'Pemasukan', data: sortedYears.map(y => yearlyData[y].masuk), backgroundColor: '#10b981', borderRadius: 4 },
-                        { label: 'Pengeluaran', data: sortedYears.map(y => yearlyData[y].keluar), backgroundColor: '#ef4444', borderRadius: 4 }
-                    ]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } }
-            });
+            const chartYearlyEl = document.getElementById('chartYearly');
+            if (chartYearlyEl) {
+                const ctxYearly = chartYearlyEl.getContext('2d');
+                if(reportChartYearly) reportChartYearly.destroy();
+                reportChartYearly = new Chart(ctxYearly, {
+                    type: 'bar',
+                    data: {
+                        labels: sortedYears,
+                        datasets: [
+                            { label: 'Pemasukan', data: sortedYears.map(y => yearlyData[y].masuk), backgroundColor: '#10b981', borderRadius: 4 },
+                            { label: 'Pengeluaran', data: sortedYears.map(y => yearlyData[y].keluar), backgroundColor: '#ef4444', borderRadius: 4 }
+                        ]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } }
+                });
+            }
 
             // =========================================================
-            // 2. OLAH & RENDER LAPORAN BULANAN (Ada Pemasukan & Pengeluaran)
+            // 3. OLAH & RENDER LAPORAN SIKLUS (Bulan Berjalan)
             // =========================================================
-            const monthIncomes = db.incomes.filter(i => i.tanggal.startsWith(selectedMonth));
-            const monthExpenses = db.expenses.filter(e => e.tanggal.startsWith(selectedMonth));
+            const monthIncomes = db.incomes.filter(i => i.tanggal >= startVal && i.tanggal <= endVal);
+            const monthExpenses = db.expenses.filter(e => e.tanggal >= startVal && e.tanggal <= endVal);
 
             const totalIncome = monthIncomes.reduce((sum, item) => sum + item.jumlah, 0);
             const totalExpense = monthExpenses.reduce((sum, item) => sum + item.jumlah, 0);
@@ -1270,28 +1269,32 @@
                 </tr>
             `;
 
-            document.getElementById('report-detailed-tbody').innerHTML = htmlDetailed;
+            const detTbody = document.getElementById('report-detailed-tbody');
+            if (detTbody) detTbody.innerHTML = htmlDetailed;
 
-            // FITUR BARU: Render Grafik Donat Bulanan
-            const ctxMonthly = document.getElementById('chartMonthly').getContext('2d');
-            if(reportChartMonthly) reportChartMonthly.destroy();
-            const catLabels = Object.keys(expGrouped).filter(c => expGrouped[c].total > 0);
-            reportChartMonthly = new Chart(ctxMonthly, {
-                type: 'doughnut',
-                data: {
-                    labels: catLabels,
-                    datasets: [{
-                        data: catLabels.map(c => expGrouped[c].total),
-                        backgroundColor: ['#ef4444', '#3b82f6', '#f59e0b', '#8b5cf6', '#10b981', '#f97316', '#6b7280'],
-                        borderWidth: 0
-                    }]
-                },
-                options: { 
-                    responsive: true, maintainAspectRatio: false, 
-                    plugins: { legend: { position: 'right', labels: { boxWidth: 12, font: { size: 11 } } } },
-                    cutout: '65%'
-                }
-            });
+            // Render Grafik Donat Siklus Berjalan
+            const chartMonthlyEl = document.getElementById('chartMonthly');
+            if (chartMonthlyEl) {
+                const ctxMonthly = chartMonthlyEl.getContext('2d');
+                if(reportChartMonthly) reportChartMonthly.destroy();
+                const catLabels = Object.keys(expGrouped).filter(c => expGrouped[c].total > 0);
+                reportChartMonthly = new Chart(ctxMonthly, {
+                    type: 'doughnut',
+                    data: {
+                        labels: catLabels,
+                        datasets: [{
+                            data: catLabels.map(c => expGrouped[c].total),
+                            backgroundColor: ['#ef4444', '#3b82f6', '#f59e0b', '#8b5cf6', '#10b981', '#f97316', '#6b7280'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: { 
+                        responsive: true, maintainAspectRatio: false, 
+                        plugins: { legend: { position: 'right', labels: { boxWidth: 12, font: { size: 11 } } } },
+                        cutout: '65%'
+                    }
+                });
+            }
         }
 
         // --- LOGIKA KLIK LAPORAN MENUJU RINCIAN (FILTER OTOMATIS) ---
